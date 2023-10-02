@@ -2,11 +2,12 @@
 title: 'ST 558: Project 2'
 author: "Chandler Ellsworth"
 date: "2023-10-02"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 ##  Markdown
@@ -19,3 +20,6 @@ When you click the **Knit** button a document will be generated that includes bo
 a;kljfl;kasdflksd;jf
 adsfadsfsd
 CZXCZXCzx
+
+
+testing 1 2 3
