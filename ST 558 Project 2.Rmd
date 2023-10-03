@@ -2,11 +2,10 @@
 title: 'ST 558: Project 2'
 author: "Chandler Ellsworth"
 date: "2023-10-02"
-output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 
 ```
 
@@ -21,17 +20,19 @@ library(tidyverse)
 ```{r}
 token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
 
-req <- request("https://api.collegefootballdata.com/talent?year=2022") %>% 
+req <- request("https://api.collegefootballdata.com/games?year=2022&seasonType=regular&team=Ohio%20State") %>% 
   req_auth_bearer_token(token) %>% 
   req_headers("Accept" = "application/json")
-
+req
 mydata <- req_perform(req)
-
+names(mydata)
 mydf <- fromJSON(rawToChar(mydata$body))
-
-mytib <- as_tibble(mydf[[1]])
-
+mydf
+mytib <- as_tibble(mydf)
 mytib
+names(mydf)
+mytib %>%
+  select(season, week, attendance, venue, home_team, home_points, away_team, away_points, excitement_index)
 
 ```
 
@@ -81,22 +82,64 @@ coaching_history <- function(first_name, last_name) {
   return(mytib)
 }
 
-paste0("https://api.collegefootballdata.com/coaches?firstName=","Mack","&lastName=","Brown")
 
 coaching_history("Mack", "Brown")
+
+
 ```
 
 
 ```{r}
-
-coaching_history2 <- function(first_name, last_name) {
+team_season_stats <- function(year, team) {
+  token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
   
-  url <- paste0("https://api.collegefootballdata.com/coaches?firstName=",first_name,"&lastName=",last_name)
+  url <- paste0("https://api.collegefootballdata.com/stats/season?year=",year,"&team=",team)
   
-  return(url)
+  req <- request(url) %>% 
+    req_auth_bearer_token(token) %>% 
+    req_headers("Accept" = "application/json")
+  
+  mydata <- req_perform(req)
+  
+  mydf <- fromJSON(rawToChar(mydata$body))
+  
+  mytib <- as_tibble(mydf)
+  
+  return(mytib)
 }
 
-coaching_history2("Mack", "Brown")
+team_season_stats(2019, "Texas")
 ```
+
+
+```{r}
+game_results <- function(year, team) {
+  token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
+  
+  url <- paste0("https://api.collegefootballdata.com/games?year=",year,"&seasonType=regular&team=",team)
+  
+  req <- request(url) %>% 
+  req_auth_bearer_token(token) %>% 
+  req_headers("Accept" = "application/json")
+
+  mydata <- req_perform(req)
+
+  mydf <- fromJSON(rawToChar(mydata$body))
+
+  mytib <- as_tibble(mydf)
+
+  mytib <- mytib %>%
+    select(season, week, attendance, venue, home_team, home_points, away_team, away_points, excitement_index)
+  
+  return(mytib)
+}
+
+game_results(2019, "Texas")
+```
+
+
+
+
+
 
 
