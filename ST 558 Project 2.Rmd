@@ -2,11 +2,30 @@
 title: 'ST 558: Project 2'
 author: "Chandler Ellsworth"
 date: "2023-10-02"
+output:
+  toc: true
+  toc_depth: 2
+  toc_float: true
+  code_folding: show
+  theme: readable
+  df_print: paged
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+The document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
 
+The functions will be used in this document to obtain data from the API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
+
+* talent composite ranking for a particular season by team  
+* coaching history based on first and last name  
+* high level team stats for a particular season and team  
+* high level game results for a particular season and team  
+* ending record for a particular season and team  
+* general information for college football venues
+
+#Overal
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 
@@ -32,7 +51,6 @@ mytib <- as_tibble(mydf)
 
 mytib %>%
   select(name, capacity, grass, city, state, elevation, year_constructed, dome)
-
 ```
 
 ```{r}
@@ -52,12 +70,11 @@ team_talent_composite_rankings <- function(year) {
   
   mytib <- as_tibble(mydf)
   
+  mytib$talent <- as.integer(mytib$talent)
+  
   return(mytib)
 
 }
-
-team_talent_composite_rankings(2018)
-
 ```
 
 
@@ -79,9 +96,6 @@ coaching_history <- function(first_name, last_name) {
   
   return(mytib)
 }
-
-
-coaching_history("Mack", "Brown")
 ```
 
 
@@ -110,8 +124,6 @@ team_season_stats <- function(year, team) {
   
   return(mytib)
 }
-
-team_season_stats(2019, "Texas")
 ```
 
 
@@ -143,8 +155,6 @@ game_results <- function(year, team) {
   
   return(mytib)
 }
-
-game_results(2019, "Ohio State")
 ```
 
 
@@ -173,8 +183,6 @@ team_records <- function(year, team) {
   
   return(mytib)
 }
-
-team_records(2022, "Ohio State")
 ```
 
 ```{r}
@@ -201,9 +209,58 @@ venue_info <- function(venue_name = NULL) {
   
   return(mytib)
 }
-
-venue_info("ACU Football Field")
 ```
+
+
+```{r}
+years <- c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
+
+listy <- list()
+
+for (year in years) {
+  
+  mytib <- team_talent_composite_rankings(year)
+  
+  listy <- append(listy, list(mytib), 0)
+}
+
+talent <- bind_rows(listy)
+
+average <- talent %>%
+  group_by(school) %>%
+  summarise(average_talent = round(mean(talent),2)) %>%
+  arrange(desc(average_talent))
+
+ggplot(average[1:10,], aes(x = reorder(school, -average_talent), y = average_talent,
+                           fill = school)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "School",
+       y = "Average Talent",
+       title = "Average School Talent Over Past 8 Years",) +
+  scale_fill_discrete(name = "School") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  geom_text(aes(label = average_talent,), size = 3, position = position_stack(vjust = 0.8))
+  
+```
+
+```{r}
+listy2 <- average[1:10,]$school
+
+talent_filter <- talent %>%
+  filter(school %in% listy2)
+
+ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
+  geom_tile() +
+  scale_fill_gradient(low="white", high="blue") +
+  labs(x = "School",
+       y = "Year",
+       title = "School Talent Over Past 8 Years",) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
+
+```
+
 
 
 

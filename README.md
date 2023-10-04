@@ -3,6 +3,25 @@ ST 558: Project 2
 Chandler Ellsworth
 2023-10-02
 
+The document is a vignette about contacting the
+`CollegeFootballData.com` (CFBD) API using created functions to query,
+parse, and return well-structured data. CFBD is a sports statistics and
+analytics website with no direct affiliation to the NCAA, its member
+conferences, or its member teams.
+
+The functions will be used in this document to obtain data from the API
+as well as some basic exploratory data analysis. The functions can be
+used to gather the following types of data:
+
+- talent composite ranking for a particular season by team  
+- coaching history based on first and last name  
+- high level team stats for a particular season and team  
+- high level game results for a particular season and team  
+- ending record for a particular season and team  
+- general information for college football venues
+
+\#Overal
+
 ``` r
 library(httr2)
 library(jsonlite)
@@ -58,27 +77,12 @@ team_talent_composite_rankings <- function(year) {
   
   mytib <- as_tibble(mydf)
   
+  mytib$talent <- as.integer(mytib$talent)
+  
   return(mytib)
 
 }
-
-team_talent_composite_rankings(2018)
 ```
-
-    ## # A tibble: 237 × 3
-    ##     year school        talent
-    ##    <int> <chr>         <chr> 
-    ##  1  2018 Ohio State    984.30
-    ##  2  2018 Alabama       978.54
-    ##  3  2018 Georgia       964.00
-    ##  4  2018 USC           933.65
-    ##  5  2018 Clemson       893.21
-    ##  6  2018 LSU           889.91
-    ##  7  2018 Florida State 888.75
-    ##  8  2018 Michigan      862.35
-    ##  9  2018 Texas         861.20
-    ## 10  2018 Notre Dame    847.85
-    ## # ℹ 227 more rows
 
 ``` r
 coaching_history <- function(first_name, last_name) {
@@ -98,27 +102,7 @@ coaching_history <- function(first_name, last_name) {
   
   return(mytib)
 }
-
-
-coaching_history("Mack", "Brown")
 ```
-
-    ## # A tibble: 34 × 12
-    ##    school       year games  wins losses  ties preseason_rank postseason_rank
-    ##    <chr>       <int> <int> <int>  <int> <int>          <int>           <int>
-    ##  1 Tulane       1985    11     1     10     0             NA              NA
-    ##  2 Tulane       1986    11     4      7     0             NA              NA
-    ##  3 Tulane       1987    12     6      6     0             NA              NA
-    ##  4 North Caro…  1988    11     1     10     0             NA              NA
-    ##  5 North Caro…  1989    11     1     10     0             NA              NA
-    ##  6 North Caro…  1990    11     6      4     1             NA              NA
-    ##  7 North Caro…  1991    11     7      4     0             NA              NA
-    ##  8 North Caro…  1992    12     9      3     0             NA              19
-    ##  9 North Caro…  1993    13    10      3     0             20              19
-    ## 10 North Caro…  1994    12     8      4     0             19              NA
-    ## # ℹ 24 more rows
-    ## # ℹ 4 more variables: srs <chr>, sp_overall <chr>, sp_offense <chr>,
-    ## #   sp_defense <chr>
 
 ``` r
 team_season_stats <- function(year, team) {
@@ -145,24 +129,7 @@ team_season_stats <- function(year, team) {
   
   return(mytib)
 }
-
-team_season_stats(2019, "Texas")
 ```
-
-    ## # A tibble: 32 × 5
-    ##    season team  conference statName              statValue
-    ##     <int> <chr> <chr>      <chr>                     <int>
-    ##  1   2019 Texas Big 12     interceptionYards           100
-    ##  2   2019 Texas Big 12     turnovers                    14
-    ##  3   2019 Texas Big 12     interceptionTDs               0
-    ##  4   2019 Texas Big 12     kickReturnTDs                 1
-    ##  5   2019 Texas Big 12     penaltyYards                890
-    ##  6   2019 Texas Big 12     penalties                    95
-    ##  7   2019 Texas Big 12     interceptions                10
-    ##  8   2019 Texas Big 12     fourthDownConversions         7
-    ##  9   2019 Texas Big 12     thirdDowns                  185
-    ## 10   2019 Texas Big 12     puntReturnYards             155
-    ## # ℹ 22 more rows
 
 ``` r
 game_results <- function(year, team) {
@@ -192,27 +159,7 @@ game_results <- function(year, team) {
   
   return(mytib)
 }
-
-game_results(2019, "Ohio State")
 ```
-
-    ## # A tibble: 13 × 9
-    ##    season  week attendance venue home_team home_points away_team away_points
-    ##     <int> <int>      <int> <chr> <chr>           <int> <chr>           <int>
-    ##  1   2019     1     103228 Ohio… Ohio Sta…          45 Florida …          21
-    ##  2   2019     2     104089 Ohio… Ohio Sta…          42 Cincinna…           0
-    ##  3   2019     3      47945 Memo… Indiana            10 Ohio Sta…          51
-    ##  4   2019     4     103190 Ohio… Ohio Sta…          76 Miami (O…           5
-    ##  5   2019     5      89759 Memo… Nebraska            7 Ohio Sta…          48
-    ##  6   2019     6     104797 Ohio… Ohio Sta…          34 Michigan…          10
-    ##  7   2019     8      47330 Ryan… Northwes…           3 Ohio Sta…          52
-    ##  8   2019     9     102998 Ohio… Ohio Sta…          38 Wisconsin           7
-    ##  9   2019    11     101022 Ohio… Ohio Sta…          73 Maryland           14
-    ## 10   2019    12      33528 High… Rutgers            21 Ohio Sta…          56
-    ## 11   2019    13     104355 Ohio… Ohio Sta…          28 Penn Sta…          17
-    ## 12   2019    14     112071 Mich… Michigan           27 Ohio Sta…          56
-    ## 13   2019    15      66649 Luca… Wisconsin          21 Ohio Sta…          34
-    ## # ℹ 1 more variable: excitement_index <chr>
 
 ``` r
 team_records <- function(year, team) {
@@ -239,14 +186,7 @@ team_records <- function(year, team) {
   
   return(mytib)
 }
-
-team_records(2022, "Ohio State")
 ```
-
-    ## # A tibble: 1 × 4
-    ##   games  wins losses  ties
-    ##   <int> <int>  <int> <int>
-    ## 1    13    11      2     0
 
 ``` r
 venue_info <- function(venue_name = NULL) {
@@ -272,11 +212,55 @@ venue_info <- function(venue_name = NULL) {
   
   return(mytib)
 }
-
-venue_info("ACU Football Field")
 ```
 
-    ## # A tibble: 1 × 8
-    ##   name           capacity grass city  state elevation year_constructed dome 
-    ##   <chr>             <int> <lgl> <chr> <chr> <chr>                <int> <lgl>
-    ## 1 ACU Football …        0 NA    Glen… AZ    <NA>                    NA FALSE
+``` r
+years <- c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
+
+listy <- list()
+
+for (year in years) {
+  
+  mytib <- team_talent_composite_rankings(year)
+  
+  listy <- append(listy, list(mytib), 0)
+}
+
+talent <- bind_rows(listy)
+
+average <- talent %>%
+  group_by(school) %>%
+  summarise(average_talent = round(mean(talent),2)) %>%
+  arrange(desc(average_talent))
+
+ggplot(average[1:10,], aes(x = reorder(school, -average_talent), y = average_talent,
+                           fill = school)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "School",
+       y = "Average Talent",
+       title = "Average School Talent Over Past 8 Years",) +
+  scale_fill_discrete(name = "School") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  geom_text(aes(label = average_talent,), size = 3, position = position_stack(vjust = 0.8))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+``` r
+listy2 <- average[1:10,]$school
+
+talent_filter <- talent %>%
+  filter(school %in% listy2)
+
+ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
+  geom_tile() +
+  scale_fill_gradient(low="white", high="blue") +
+  labs(x = "School",
+       y = "Year",
+       title = "School Talent Over Past 8 Years",) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
