@@ -105,12 +105,15 @@ team_season_stats <- function(year, team) {
   
   first_name <- word(team, 1)
   last_name <- word(team, 2)
+  A <- word(word(team, 1, sep = "&"),2)
+  M <- word(team, 2, sep = "&")
   
-  url <- ifelse(grepl(" ", team),
-                paste0("https://api.collegefootballdata.com/stats/season?year=",
-                       year,"&team=",first_name,"%20",last_name),
-                paste0("https://api.collegefootballdata.com/stats/season?year=",
-                       year,"&team=",team))
+  url <- ifelse(grepl("&", team), paste0("https://api.collegefootballdata.com/stats/season?year=",
+                       year,"&team=",first_name,"%20",A,"%26",M),
+                ifelse(grepl(" ", team),
+                       paste0("https://api.collegefootballdata.com/stats/season?year=",year,"&team=",
+                              first_name,"%20",last_name),
+                       paste0("https://api.collegefootballdata.com/stats/season?year=",year,"&team=",team)))
   
   req <- request(url) %>% 
     req_auth_bearer_token(token) %>% 
@@ -133,12 +136,16 @@ game_results <- function(year, team) {
   
   first_name <- word(team, 1)
   last_name <- word(team, 2)
+  A <- word(word(team, 1, sep = "&"),2)
+  M <- word(team, 2, sep = "&")
   
-  url <- ifelse(grepl(" ", team),
-                paste0("https://api.collegefootballdata.com/games?year=",
-                       year,"&seasonType=regular&team=",first_name,"%20",last_name),
-                paste0("https://api.collegefootballdata.com/games?year=",
-                       year,"&seasonType=regular&team=",team))
+  url <- ifelse(grepl("&", team), paste0("https://api.collegefootballdata.com/games?year=",
+                       year,"&seasonType=regular&team=",first_name,"%20",A,"%26",M),
+                ifelse(grepl(" ", team),
+                       paste0("https://api.collegefootballdata.com/games?year=",
+                              year,"&seasonType=regular&team=",first_name,"%20",last_name),
+                       paste0("https://api.collegefootballdata.com/games?year=",
+                              year,"&seasonType=regular&team=",team)))
   
   req <- request(url) %>% 
   req_auth_bearer_token(token) %>% 
@@ -164,12 +171,16 @@ team_records <- function(year, team) {
   
   first_name <- word(team, 1)
   last_name <- word(team, 2)
+  A <- word(word(team, 1, sep = "&"),2)
+  M <- word(team, 2, sep = "&")
   
-  url <- ifelse(grepl(" ", team),
-                paste0("https://api.collegefootballdata.com/records?year=",
-                       year,"&team=",first_name,"%20",last_name),
-                paste0("https://api.collegefootballdata.com/records?year=",
-                       year,"&team=",team))
+  url <- ifelse(grepl("&", team), paste0("https://api.collegefootballdata.com/records?year=",
+                                         year,"&team=",first_name,"%20",A,"%26",M),
+                ifelse(grepl(" ", team),
+                       paste0("https://api.collegefootballdata.com/records?year=",
+                              year,"&team=",first_name,"%20",last_name),
+                       paste0("https://api.collegefootballdata.com/records?year=",
+                              year,"&team=",team)))
   
   req <- request(url) %>% 
     req_auth_bearer_token(token) %>% 
@@ -213,7 +224,7 @@ venue_info <- function(venue_name = NULL) {
 
 
 ```{r}
-years <- c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
+years <- c(2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
 
 listy <- list()
 
@@ -231,17 +242,19 @@ average <- talent %>%
   summarise(average_talent = round(mean(talent),2)) %>%
   arrange(desc(average_talent))
 
-ggplot(average[1:10,], aes(x = reorder(school, -average_talent), y = average_talent,
+ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
+                           y = average_talent,
                            fill = school)) +
   geom_bar(stat = "identity") + 
   labs(x = "School",
        y = "Average Talent",
-       title = "Average School Talent Over Past 8 Years",) +
+       title = "Average School Talent Over Past 10 Years") +
   scale_fill_discrete(name = "School") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  geom_text(aes(label = average_talent,), size = 3, position = position_stack(vjust = 0.8))
-  
+  geom_text(aes(label = average_talent,), 
+            size = 3, 
+            position = position_stack(vjust = 0.8))
 ```
 
 ```{r}
@@ -255,13 +268,49 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_fill_gradient(low="white", high="blue") +
   labs(x = "School",
        y = "Year",
-       title = "School Talent Over Past 8 Years",) +
+       title = "School Talent Over Past 10 Years",) +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
-
 ```
 
 
+```{r}
+combo <- expand.grid(years, listy2)
 
+list_tib <- apply(combo, MARGIN = 1, 
+                  FUN = function(x) {
+                    tib <- game_results(x[1],x[2])
+                    tib$team <- x[2]
+                    if_else(tib$home_team == x[2], 
+                            mutate(tib, point_diff = (home_points - away_points)), 
+                                   mutate(tib, point_diff = (away_points - home_points)))})
+
+bind_tib <- bind_rows(list_tib) %>%
+  filter(!is.na(point_diff))
+
+bind_tib_avg <- bind_tib %>%
+  group_by(team) %>%
+  summarise(avg_point_margin = mean(point_diff)) %>%
+  arrange(desc(avg_point_margin))
+
+ggplot(bind_tib_avg, aes(x = reorder(team, -avg_point_margin), 
+                         y = avg_point_margin,
+                         fill = team)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "School",
+       y = "Average Margin of Victory",
+       title = "Average Margin of Victory Over Past 10 Years") +
+  scale_fill_discrete(name = "School") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  geom_text(aes(label = round(avg_point_margin, 2)), 
+            size = 3, 
+            position = position_stack(vjust = 0.8))
+
+```
+
+```{r}
+2+2
+```
 
 
