@@ -1,18 +1,10 @@
 ---
-title: 'ST 558: Project 2'
+title: 'CFBD-API-Vignette'
 author: "Chandler Ellsworth"
-date: "2023-10-02"
-output:
-  html_document:
-  toc: true
-  toc_depth: 2
-  toc_float: true
-  code_folding: show
-  theme: readable
-  df_print: paged
+output: rmarkdown::github_document
 ---
 
-The document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
+This document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
 
 The functions will be used in this document to obtain data from the API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
 
@@ -73,7 +65,7 @@ team_talent_composite_rankings <- function(year) {
 }
 ```
 
-### coaching_history
+### `coaching_history`
 
 This function allows the user to analyze the performance history of a specific coach, such as wins, losses, rankings, schools, etc. The arguments are `first_name` and `last_name`, with no defaults so make sure these are populated and given as a character, between quotation, such as `"name"`. From my testing, it does not seem to matter if you capitalize the first or last name. Some form of `apply` can also be used to pull in data for multiple coaches.
 

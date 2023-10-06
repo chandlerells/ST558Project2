@@ -1,12 +1,11 @@
-ST 558: Project 2
+CFBD-API-Vignette
 ================
 Chandler Ellsworth
-2023-10-02
 
 - [Requirment Packages](#requirment-packages)
 - [API Interaction Functions](#api-interaction-functions)
   - [`team_talent_composite_ranking`](#team_talent_composite_ranking)
-  - [coaching_history](#coaching_history)
+  - [`coaching_history`](#coaching_history)
   - [`team_season_stats`](#team_season_stats)
   - [`game_results`](#game_results)
   - [`team_records`](#team_records)
@@ -14,7 +13,7 @@ Chandler Ellsworth
 - [Exploratory Data Analysis](#exploratory-data-analysis)
 - [Wrap Up](#wrap-up)
 
-The document is a vignette about contacting the
+This document is a vignette about contacting the
 `CollegeFootballData.com` (CFBD) API using created functions to query,
 parse, and return well-structured data. CFBD is a sports statistics and
 analytics website with no direct affiliation to the NCAA, its member
@@ -81,7 +80,7 @@ team_talent_composite_rankings <- function(year) {
 }
 ```
 
-### coaching_history
+### `coaching_history`
 
 This function allows the user to analyze the performance history of a
 specific coach, such as wins, losses, rankings, schools, etc. The
