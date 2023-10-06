@@ -41,7 +41,7 @@ library(tidyverse)
 
 The following section will lay out the created functions described above in more detail.
 
-`team_talent_composite_ranking`
+### `team_talent_composite_ranking`
 
 This function allows the user to query on a specific football season (year) and return talent composite rankings in the form of a tibble. If multiple seasons want to be analyzed, a form of `apply` could utilize this function to pull in talent composite rankings across multiple seasons. There is no default to the `year` argument, so make sure to specify that during the function call.
 
@@ -70,7 +70,7 @@ team_talent_composite_rankings <- function(year) {
 }
 ```
 
-`coaching_history`
+### `coaching_history`
 
 This function allows the user to analyze the performance history of a specific coach, such as wins, losses, rankings, schools, etc. The arguments are `first_name` and `last_name`, with no defaults so make sure these are populated and given as a character, between quotation, such as `"name"`. From my testing, it does not seem to matter if you capitalize the first or last name. Some form of `apply` can also be used to pull in data for multiple coaches.
 
@@ -96,7 +96,7 @@ coaching_history <- function(first_name, last_name) {
 }
 ```
 
-`team_season_stats`
+### `team_season_stats`
 
 This function allows the user to analyze high level team stats for a particular season and team. Stats are relevant to both the offensive and defensive side of the pall, so plenty of things to filter on. The required arguments, with no defaults, are `year` and `team`, so make sure these are populated. Year in the form of an integer and team as a character string wrapped between quotations. One thing to note is that this function may not work for very unique school names that have specific characters included in their name. It should work for schools that don't have any symbols. One thing that was built in was a `&` in the second name, such as `Texas A&M`. For multiple years worth of stats, some for of the `apply` function could be used.
 
@@ -136,7 +136,7 @@ team_season_stats <- function(year, team) {
 }
 ```
 
-`game_results`
+### `game_results`
 
 This function allows the user to at high level game results for a particular season and team such as scores, teams, attendance, and week. The required arguments, with no defaults, are `year` and `team`, so make sure these are populated. Year in the form of an integer and team as a character string wrapped between quotations. One thing to note is that this function may not work for very unique school names that have specific characters included in their name. It should work for schools that don't have any symbols. One thing that was built in was a `&` in the second name, such as `Texas A&M`. For multiple years worth of game results, some for of the `apply` function could be used.
 
@@ -176,7 +176,7 @@ game_results <- function(year, team) {
 }
 ```
 
-`team_records`
+### `team_records`
 
 This simple function allows the user to return the record for a specific year and team. The required arguments, with no defaults, are `year` and `team`, so make sure these are populated. Year in the form of an integer and team as a character string wrapped between quotations. One thing to note is that this function may not work for very unique school names that have specific characters included in their name. It should work for schools that don't have any symbols. One thing that was built in was a `&` in the second name, such as `Texas A&M`. For multiple years worth of team records, some form of the `apply` function could be used.
 
@@ -212,7 +212,7 @@ team_records <- function(year, team) {
 }
 ```
 
-`venue_info`
+### `venue_info`
 
 The function allows the user to see high level information for the different venues in college football. The only argument that is specified is `venue_name`, if one only wanted to look at one venue. This is an optional argument, so if it is not specified, all venues will be returned. If a venue name is specified, make sure it is spelled correctly and between quotations.
 
@@ -585,4 +585,7 @@ We can also look at a contingency table of the number of stadiums in each state.
 table(venue_info()$state)
 ```
 
+# Wrap Up
+
+To conclude this vignette, I made functions to query the CFBD API for different endpoints and utilized them for basic exploratory data analysis. I hope these tools are useful and can help in your analysis of college football data for different seasons and teams!
 

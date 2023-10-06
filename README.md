@@ -35,7 +35,7 @@ The following packages were used to interact with the CFBD API:
 The following section will lay out the created functions described above
 in more detail.
 
-`team_talent_composite_ranking`
+### `team_talent_composite_ranking`
 
 This function allows the user to query on a specific football season
 (year) and return talent composite rankings in the form of a tibble. If
@@ -69,7 +69,7 @@ team_talent_composite_rankings <- function(year) {
 }
 ```
 
-`coaching_history`
+### `coaching_history`
 
 This function allows the user to analyze the performance history of a
 specific coach, such as wins, losses, rankings, schools, etc. The
@@ -101,7 +101,7 @@ coaching_history <- function(first_name, last_name) {
 }
 ```
 
-`team_season_stats`
+### `team_season_stats`
 
 This function allows the user to analyze high level team stats for a
 particular season and team. Stats are relevant to both the offensive and
@@ -151,7 +151,7 @@ team_season_stats <- function(year, team) {
 }
 ```
 
-`game_results`
+### `game_results`
 
 This function allows the user to at high level game results for a
 particular season and team such as scores, teams, attendance, and week.
@@ -200,7 +200,7 @@ game_results <- function(year, team) {
 }
 ```
 
-`team_records`
+### `team_records`
 
 This simple function allows the user to return the record for a specific
 year and team. The required arguments, with no defaults, are `year` and
@@ -244,7 +244,7 @@ team_records <- function(year, team) {
 }
 ```
 
-`venue_info`
+### `venue_info`
 
 The function allows the user to see high level information for the
 different venues in college football. The only argument that is
@@ -349,7 +349,7 @@ ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- --> It looks
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- --> It looks
 like there is a fairly large drop off after the first three schools,
 with `Alabama` dominating over the past 10 seasons. There is a material
 difference between Alabama and Michigan, the first and tenth highest
@@ -381,7 +381,7 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- --> It looks
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- --> It looks
 like from the heat map that `Alabama` has consistently remained top of
 the list for each of the individual 10 seasons. `Georgia` and
 `Ohio State` seem to have done a great job over the last 10 season
@@ -490,7 +490,7 @@ ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 It looks like overall, the teams with the highest average talent, beat
 teams by a higher margin. `Clemson` and `Michigan` seem to be making a
@@ -592,7 +592,7 @@ ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
                             guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 While there doesn’t seem to be much variation in interception, kick
 return, or punt return touchdowns across the teams, there is for more
@@ -638,7 +638,7 @@ ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 While these were not the results that I was expecting, as I suspected
 there to be a clear team that brought in the greatest attendance, there
@@ -814,7 +814,7 @@ ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 It looks like `Nick Saban` and `Mack Brown` are the two active coaches
 that have the most wins and by a good margin. I think this relates well
@@ -855,7 +855,7 @@ ggplot(high_capacity, aes(reorder(name, -capacity),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 We can also look at a contingency table of the number of stadiums in
 each state. It is not surprising that the states
@@ -873,3 +873,10 @@ table(venue_info()$state)
     ##  13  32  12   7  23  28  21  10   3  37   5   6   5  13   5   1   3  35  44 
     ##  OK  OR  PA  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
     ##  12  11  57   4  16  10  20  56   6  27   3   9  19  14   1
+
+# Wrap Up
+
+To conclude this vignette, I made functions to query the CFBD API for
+different endpoints and utilized them for basic exploratory data
+analysis. I hope these tools are useful and can help in your analysis of
+college football data for different seasons and teams!
