@@ -20,72 +20,68 @@ used to gather the following types of data:
 - ending record for a particular season and team  
 - general information for college football venues
 
-\#Overal
+# Requirment Packages
 
-``` r
-library(httr2)
-library(jsonlite)
-library(tidyverse)
-```
+The following packages were used to interact with the CFBD API:
 
-``` r
-token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
+- `httr2` Tools for creating and modifying HTTP request, then performing
+  them and processing the results
+- `jsonlite`: JSON parser/generator optimized for the web
+- `tidyverse`: Opinionated collection of R packages designed for data
+  science
 
-req <- request("https://api.collegefootballdata.com/venues") %>% 
-  req_auth_bearer_token(token) %>% 
-  req_headers("Accept" = "application/json")
+# API Interaction Functions
 
-mydata <- req_perform(req)
+The following section will lay out the created functions described above
+in more detail.
 
-mydf <- fromJSON(rawToChar(mydata$body))
+`team_talent_composite_ranking`
 
-mytib <- as_tibble(mydf)
-
-mytib %>%
-  select(name, capacity, grass, city, state, elevation, year_constructed, dome)
-```
-
-    ## # A tibble: 816 × 8
-    ##    name          capacity grass city  state elevation year_constructed dome 
-    ##    <chr>            <int> <lgl> <chr> <chr> <chr>                <int> <lgl>
-    ##  1 Abbott Memor…    10000 NA    Tusk… AL    122.8                 1925 FALSE
-    ##  2 Abel Stadium      2500 NA    Linc… NE    <NA>                    NA FALSE
-    ##  3 Ace W. Mumfo…    28500 FALSE Bato… LA    20.24213…             1928 FALSE
-    ##  4 ACU Football…        0 NA    Glen… AZ    <NA>                    NA FALSE
-    ##  5 Adamson Stad…     6500 NA    Brow… PA    <NA>                    NA FALSE
-    ##  6 Aggie Memori…    28853 FALSE Las … NM    1208.201…             1978 FALSE
-    ##  7 Aggie Stadium    21500 TRUE  Gree… NC    235.1224…             1981 FALSE
-    ##  8 Aggie Stadium    10743 FALSE Davis CA    11.38259…             2007 FALSE
-    ##  9 A.J. McClung…        0 NA    Colu… GA    <NA>                    NA FALSE
-    ## 10 A.J. Simeon …    15000 NA    High… NC    <NA>                    NA FALSE
-    ## # ℹ 806 more rows
+This function allows the user to query on a specific football season
+(year) and return talent composite rankings in the form of a tibble. If
+multiple seasons want to be analyzed, a form of `apply` could utilize
+this function to pull in talent composite rankings across multiple
+seasons. There is no default to the `year` argument, so make sure to
+specify that during the function call.
 
 ``` r
 team_talent_composite_rankings <- function(year) {
-  
+  #utilize my required key needed for interacting with the API
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
-  
+  #create the url needed to pull the data in, which allows for different years
   url <- paste0("https://api.collegefootballdata.com/talent?year=",year)
-  
-  req <- request(url) %>% 
-    req_auth_bearer_token(token) %>% 
+  #performs the HTTP request with the specified token
+  req <- request(url) %>%
+    req_auth_bearer_token(token) %>%
+    #tailor HTTP request with headers
     req_headers("Accept" = "application/json")
-  
+  #perform the request and fetch the response
   mydata <- req_perform(req)
-  
+  #convert JSON structure to characters and grab the body element of the list 
+  #which contains the relevant data
   mydf <- fromJSON(rawToChar(mydata$body))
-  
+  #convert to tibble
   mytib <- as_tibble(mydf)
-  
+  #make the talent column an integer to do analysis on
   mytib$talent <- as.integer(mytib$talent)
   
   return(mytib)
-
 }
 ```
 
+`coaching_history`
+
+This function allows the user to analyze the performance history of a
+specific coach, such as wins, losses, rankings, schools, etc. The
+arguments are `first_name` and `last_name`, with no defaults so make
+sure these are populated and given as a character, between quotation,
+such as `"name"`. From my testing, it does not seem to matter if you
+capitalize the first or last name. Some form of `apply` can also be used
+to pull in data for multiple coaches.
+
 ``` r
 coaching_history <- function(first_name, last_name) {
+  #same procedure from first function
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
   
   url <- paste0("https://api.collegefootballdata.com/coaches?firstName=",first_name,"&lastName=",last_name)
@@ -95,24 +91,45 @@ coaching_history <- function(first_name, last_name) {
     req_headers("Accept" = "application/json")
   
   mydata <- req_perform(req)
-  
+  #data on this request is stored slightly differently, with the relevant data
+  #frame of data stored in the seasons column, so pull that in
   mydf <- fromJSON(rawToChar(mydata$body))$seasons
-  
+  #the data relevant to coaching history is the first element, so conver to a tibble
   mytib <- as_tibble(mydf[[1]])
   
   return(mytib)
 }
 ```
 
+`team_season_stats`
+
+This function allows the user to analyze high level team stats for a
+particular season and team. Stats are relevant to both the offensive and
+defensive side of the pall, so plenty of things to filter on. The
+required arguments, with no defaults, are `year` and `team`, so make
+sure these are populated. Year in the form of an integer and team as a
+character string wrapped between quotations. One thing to note is that
+this function may not work for very unique school names that have
+specific characters included in their name. It should work for schools
+that don’t have any symbols. One thing that was built in was a `&` in
+the second name, such as `Texas A&M`. For multiple years worth of stats,
+some for of the `apply` function could be used.
+
 ``` r
 team_season_stats <- function(year, team) {
+  
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
-  
+  #store the first name of team provided
   first_name <- word(team, 1)
+  #store the last name of the team provided
   last_name <- word(team, 2)
+  #unique case for Texas A&M, since it's such a relevant football school
+  #within the last name, store the first letter before the &
   A <- word(word(team, 1, sep = "&"),2)
+  #within the last name, store the second letter after the &
   M <- word(team, 2, sep = "&")
-  
+  #use if else logic as the url changes based on if the team provided is one word,
+  # two words, or the unique case with the & in last name
   url <- ifelse(grepl("&", team), paste0("https://api.collegefootballdata.com/stats/season?year=",
                        year,"&team=",first_name,"%20",A,"%26",M),
                 ifelse(grepl(" ", team),
@@ -134,8 +151,22 @@ team_season_stats <- function(year, team) {
 }
 ```
 
+`game_results`
+
+This function allows the user to at high level game results for a
+particular season and team such as scores, teams, attendance, and week.
+The required arguments, with no defaults, are `year` and `team`, so make
+sure these are populated. Year in the form of an integer and team as a
+character string wrapped between quotations. One thing to note is that
+this function may not work for very unique school names that have
+specific characters included in their name. It should work for schools
+that don’t have any symbols. One thing that was built in was a `&` in
+the second name, such as `Texas A&M`. For multiple years worth of game
+results, some for of the `apply` function could be used.
+
 ``` r
 game_results <- function(year, team) {
+  #same code format utilized in the team stats function, with a different url
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
   
   first_name <- word(team, 1)
@@ -154,22 +185,36 @@ game_results <- function(year, team) {
   req <- request(url) %>% 
   req_auth_bearer_token(token) %>% 
   req_headers("Accept" = "application/json")
-
+  
   mydata <- req_perform(req)
-
+  
   mydf <- fromJSON(rawToChar(mydata$body))
-
+  
   mytib <- as_tibble(mydf)
-
+  #there were numerous columns that were not helpful, so only select relevant columns
   mytib <- mytib %>%
-    select(season, week, attendance, venue, home_team, home_points, away_team, away_points, excitement_index)
+    select(season, week, away_conference, attendance, venue, home_team, home_points,
+           away_team, away_points, excitement_index)
   
   return(mytib)
 }
 ```
 
+`team_records`
+
+This simple function allows the user to return the record for a specific
+year and team. The required arguments, with no defaults, are `year` and
+`team`, so make sure these are populated. Year in the form of an integer
+and team as a character string wrapped between quotations. One thing to
+note is that this function may not work for very unique school names
+that have specific characters included in their name. It should work for
+schools that don’t have any symbols. One thing that was built in was a
+`&` in the second name, such as `Texas A&M`. For multiple years worth of
+team records, some form of the `apply` function could be used.
+
 ``` r
 team_records <- function(year, team) {
+  #similar code to above functions involving year and team, with a different url
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
   
   first_name <- word(team, 1)
@@ -188,34 +233,45 @@ team_records <- function(year, team) {
   req <- request(url) %>% 
     req_auth_bearer_token(token) %>% 
     req_headers("Accept" = "application/json")
-
+  
   mydata <- req_perform(req)
-
+  #df we want is stored in the total columns, so pull that in
   mydf <- fromJSON(rawToChar(mydata$body))$total
-
+  
   mytib <- as_tibble(mydf)
   
   return(mytib)
 }
 ```
 
+`venue_info`
+
+The function allows the user to see high level information for the
+different venues in college football. The only argument that is
+specified is `venue_name`, if one only wanted to look at one venue. This
+is an optional argument, so if it is not specified, all venues will be
+returned. If a venue name is specified, make sure it is spelled
+correctly and between quotations.
+
 ``` r
 venue_info <- function(venue_name = NULL) {
+  #same as previous function, with a different url
   token <- 'L8SLuL2Jzi8KI5g0iHQYaERuCZgEDvyxDpOvDTgSqrLWvU7/8Yd5XuAPCfZJjMCJ'
 
   req <- request("https://api.collegefootballdata.com/venues") %>% 
     req_auth_bearer_token(token) %>% 
     req_headers("Accept" = "application/json")
-
+  
   mydata <- req_perform(req)
-
+  
   mydf <- fromJSON(rawToChar(mydata$body))
-
+  
   mytib <- as_tibble(mydf)
-
+  #select only useful columns for data analysis 
   mytib <- mytib %>%
     select(name, capacity, grass, city, state, elevation, year_constructed, dome)
-  
+  #if venue name is given in the function call, filter the tibble on 
+  #that specific venue
   ifelse(!is.null(venue_name),
          mytib <- mytib %>%
            filter(name == venue_name),
@@ -225,64 +281,135 @@ venue_info <- function(venue_name = NULL) {
 }
 ```
 
+# Exploratory Data Analysis
+
+Now that we have functions that can be utilized to query on different
+endpoint of the CFDB API, let do some basic exploratory data analysis.
+Since the majority of the functions created can only pull in one year at
+a time, I will utilize a form of the `apply` function to look at data
+from the past 10 seasons, gathering averages for overall analysis of
+performance. Some of the things I’m interested in are as follows:
+
+- How does team talent rankings for the most talented teams transfer to
+  actual performance?  
+- For the overall most talented team based on the past 10 seasons, which
+  opponents draw in the highest crowd attendance?  
+- For the most tenured active head coaches, how do their win totals
+  compare and how many different schools have they coached at?  
+- Which stadiums have the highest capacity?
+
+First, I need to create a vector of the last 10 seasons and create an
+empty list that multiple data frames can be appended to. For the sake of
+practicing different methods, I am going to perform a `for loop` for
+this task. I will loop through each of the seasons, run the
+`team_talent_composite_rankings` function and group by the school,
+finding the average talent for each team, sorted from highest to lowest.
+To help visualize this, I will plot the 10 highest average talent
+rankings with a bar chart.
+
 ``` r
+#create vector for differernt seasons
 years <- c(2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
-
+#create empty list to append data frames from for loop
 listy <- list()
-
+#use for loop to iterate through each year in years vector
 for (year in years) {
-  
+  #get talent composite rankings
   mytib <- team_talent_composite_rankings(year)
-  
+  #append data frame to list
   listy <- append(listy, list(mytib), 0)
 }
-
+#merge all the data frame elements in the list
 talent <- bind_rows(listy)
-
+#use the talent data frame to group by school and find the average talent,
+#arranged from highest to lowest
 average <- talent %>%
   group_by(school) %>%
   summarise(average_talent = round(mean(talent),2)) %>%
   arrange(desc(average_talent))
-
+#plot bar graph using the indexed average df for the top 10 average talent rankings
 ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
                            y = average_talent,
+                           #create different colors for each school
                            fill = school)) +
+  #create bar chart
   geom_bar(stat = "identity") + 
+  #add appropriate labels to the chart for title, axes, and legend
   labs(x = "School",
        y = "Average Talent",
        title = "Average School Talent Over Past 10 Years") +
   scale_fill_discrete(name = "School") +
+  #put the chart title in the center
   theme(plot.title = element_text(hjust = 0.5)) +
+  #make sure x axis elements are not overlapping
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  #add data labels for each school
   geom_text(aes(label = average_talent,), 
             size = 3, 
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- --> It looks
+like there is a fairly large drop off after the first three schools,
+with `Alabama` dominating over the past 10 seasons. There is a material
+difference between Alabama and Michigan, the first and tenth highest
+average rankings. Luckily my alma mater, `Texas A&M`, cracks the top 10!
+
+Next, for the top 10 ranked schools, lets use a `heat map` to see the
+trend of how the rankings for each individual season have fared for each
+school.
 
 ``` r
+#create a unique list of schools that make the top 10
 listy2 <- average[1:10,]$school
-
+#filter the talent data frame for the schools in the top 10
 talent_filter <- talent %>%
   filter(school %in% listy2)
-
+#fill this time by talent
 ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
+  #create the heat map
   geom_tile() +
+  #change gradient scheme of low and high values to white and blue, respectively
   scale_fill_gradient(low="white", high="blue") +
+  #add appropriate labels
   labs(x = "School",
        y = "Year",
        title = "School Talent Over Past 10 Years",) +
+  #adjust title to center
   theme(plot.title = element_text(hjust = 0.5)) +
+  #make sure x axis labels are not overlapping
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- --> It looks
+like from the heat map that `Alabama` has consistently remained top of
+the list for each of the individual 10 seasons. `Georgia` and
+`Ohio State` seem to have done a great job over the last 10 season
+bringing in top talent, slowly increasing their overall talent rankings.
+`USC` on the other hand, seems to have slightly regressed over the top
+10 seasons in the talent they are bringing in.
+
+Lets see how well the average talent rankings translate to performance.
+One metric we can use to analyze this is looking at average margin of
+victory over the last 10 seasons. The thought process here is that
+higher talent will make a team more likely to win games and at a higher
+margin.
+
+To do this, we’ll need to create a grid of each season and team. We’ll
+use a different approach then a for loop by utilizing `apply` to run the
+`game_results` function across each combination of season and team.
+Since the `game_results` output only has home and away scores, not the
+difference, we’ll have to add a new column and calculate this ourselves.
+We’ll merge all the data frames together, and group by team on the
+output. We’ll summarize the new point differential column for the
+average and arrage from highest to smallest. We’ll visualize the results
+through a bar graph.
 
 ``` r
+#create a combo of each season and team
 combo <- expand.grid(years, listy2)
-
-list_tib <- apply(combo, MARGIN = 1, 
+#apply the game results function to each combo of season and team
+game_results_tib <- apply(combo, MARGIN = 1, 
                   FUN = function(x) {
                     tib <- game_results(x[1],x[2])
                     tib$team <- x[2]
@@ -290,15 +417,15 @@ list_tib <- apply(combo, MARGIN = 1,
                             mutate(tib, point_diff = (home_points - away_points)), 
                                    mutate(tib, point_diff = (away_points - home_points)))})
 
-bind_tib <- bind_rows(list_tib) %>%
+bind_game_results <- bind_rows(game_results_tib) %>%
   filter(!is.na(point_diff))
 
-bind_tib_avg <- bind_tib %>%
+bind_gr_avg <- bind_game_results %>%
   group_by(team) %>%
   summarise(avg_point_margin = mean(point_diff)) %>%
   arrange(desc(avg_point_margin))
 
-ggplot(bind_tib_avg, aes(x = reorder(team, -avg_point_margin), 
+ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin), 
                          y = avg_point_margin,
                          fill = team)) +
   geom_bar(stat = "identity") + 
@@ -313,10 +440,236 @@ ggplot(bind_tib_avg, aes(x = reorder(team, -avg_point_margin),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
-2+2
+team_stat_tib <- apply(combo, MARGIN = 1, 
+                  FUN = function(x) team_season_stats(x[1],x[2]))
+
+team_stat <- bind_rows(team_stat_tib)
+team_stat
 ```
 
-    ## [1] 4
+    ## # A tibble: 3,160 × 5
+    ##    season team    conference statName              statValue
+    ##     <int> <chr>   <chr>      <chr>                     <int>
+    ##  1   2014 Alabama SEC        thirdDownConversions        102
+    ##  2   2014 Alabama SEC        puntReturnTDs                 0
+    ##  3   2014 Alabama SEC        interceptionYards            84
+    ##  4   2014 Alabama SEC        turnovers                    22
+    ##  5   2014 Alabama SEC        penalties                    69
+    ##  6   2014 Alabama SEC        firstDowns                  340
+    ##  7   2014 Alabama SEC        kickReturns                  50
+    ##  8   2014 Alabama SEC        passCompletions             290
+    ##  9   2014 Alabama SEC        fourthDownConversions        10
+    ## 10   2014 Alabama SEC        fourthDowns                  13
+    ## # ℹ 3,150 more rows
+
+``` r
+team_stat_avg <- team_stat %>%
+  group_by(team, statName) %>%
+  summarise(avg_stat_value = mean(statValue), .groups = 'keep') %>%
+  filter(grepl('TDs', statName))
+
+ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
+  geom_point() +
+  labs(x = "Stat",
+       y = "Average",
+       title = "Average TD Counts Over Past 10 Years by School") +
+  scale_color_discrete(name = "School") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(labels = c('Interception TDs', 'Kick Return TDs', 'Passing TDs', 
+                            'Punt Return TDs', 'Rushing TDs'),
+                            guide = guide_axis(n.dodge=2))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+
+``` r
+bama_results_tib <- lapply(years,
+                  FUN = function(x) {
+                    tib <- game_results(x[1],"Alabama")
+                    filter(tib, !is.na(attendance), 
+                           venue == "Bryant Denny Stadium",
+                           away_conference == "SEC")})
+
+bama_results <- bind_rows(bama_results_tib)
+
+ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_team)) +
+  geom_jitter() +
+  ylim(95, 103) + 
+  labs(x = "Season",
+       y = "Attendance ('000s)",
+       title = "Alabama Home Game Attendence Over Past 10 Years by School") +
+  scale_color_discrete(name = "School") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+``` r
+bama_results_avg <- bama_results %>%
+  group_by(away_team) %>%
+  summarise(avg_attendance = mean(attendance)) %>%
+  arrange(desc(avg_attendance))
+
+bama_results_avg
+```
+
+    ## # A tibble: 12 × 2
+    ##    away_team         avg_attendance
+    ##    <chr>                      <dbl>
+    ##  1 Florida                  101821 
+    ##  2 Missouri                 101821 
+    ##  3 LSU                      101385 
+    ##  4 Tennessee                101385 
+    ##  5 Ole Miss                 100827.
+    ##  6 Arkansas                 100550.
+    ##  7 Vanderbilt                96246 
+    ##  8 Auburn                    84993.
+    ##  9 Mississippi State         84993.
+    ## 10 Texas A&M                 84993.
+    ## 11 Kentucky                  60622.
+    ## 12 Georgia                   19424
+
+``` r
+bama_excitement_avg <- bama_results %>%
+  group_by(away_team) %>%
+  summarise(avg_excitement = mean(round(as.numeric(excitement_index),0))) %>%
+  arrange(desc(avg_excitement))
+
+bama_excitement_avg
+```
+
+    ## # A tibble: 12 × 2
+    ##    away_team         avg_excitement
+    ##    <chr>                      <dbl>
+    ##  1 Georgia                     6   
+    ##  2 Florida                     4   
+    ##  3 LSU                         3.75
+    ##  4 Auburn                      2.6 
+    ##  5 Tennessee                   2.5 
+    ##  6 Texas A&M                   2.2 
+    ##  7 Arkansas                    2   
+    ##  8 Ole Miss                    2   
+    ##  9 Mississippi State           1.6 
+    ## 10 Kentucky                    1   
+    ## 11 Vanderbilt                  1   
+    ## 12 Missouri                    0
+
+``` r
+bama_results
+```
+
+    ## # A tibble: 37 × 10
+    ##    season  week away_conference attendance venue       home_team home_points
+    ##     <int> <int> <chr>                <int> <chr>       <chr>           <int>
+    ##  1   2014     4 SEC                 101821 Bryant Den… Alabama            42
+    ##  2   2014     8 SEC                 101821 Bryant Den… Alabama            59
+    ##  3   2014    12 SEC                 101821 Bryant Den… Alabama            25
+    ##  4   2014    14 SEC                 101821 Bryant Den… Alabama            55
+    ##  5   2015     3 SEC                 101821 Bryant Den… Alabama            37
+    ##  6   2015     6 SEC                 101821 Bryant Den… Alabama            27
+    ##  7   2015     8 SEC                 101821 Bryant Den… Alabama            19
+    ##  8   2015    10 SEC                 101821 Bryant Den… Alabama            30
+    ##  9   2016     5 SEC                 101821 Bryant Den… Alabama            34
+    ## 10   2016     8 SEC                 101821 Bryant Den… Alabama            33
+    ## # ℹ 27 more rows
+    ## # ℹ 3 more variables: away_team <chr>, away_points <int>,
+    ## #   excitement_index <chr>
+
+``` r
+coach <- data.frame(first_name = c("Nick", "Mack", "Kirk", "Brian", "Dabo"),
+           last_name = c("Saban", "Brown", "Ferentz", "Kelly", "Swinney"))
+
+coaches <- apply(coach, MARGIN = 1, 
+                  FUN = function(x) {
+                  tib <- coaching_history(x[1],x[2])
+                  mutate(tib, coach = paste(x[1], x[2]))})
+
+bind_coaches <- bind_rows(coaches)
+
+table(bind_coaches$school, bind_coaches$coach)
+```
+
+    ##                   
+    ##                    Brian Kelly Dabo Swinney Kirk Ferentz Mack Brown
+    ##   Alabama                    0            0            0          0
+    ##   Central Michigan           3            0            0          0
+    ##   Cincinnati                 4            0            0          0
+    ##   Clemson                    0           16            0          0
+    ##   Iowa                       0            0           25          0
+    ##   LSU                        2            0            0          0
+    ##   Michigan State             0            0            0          0
+    ##   North Carolina             0            0            0         15
+    ##   Notre Dame                12            0            0          0
+    ##   Texas                      0            0            0         16
+    ##   Toledo                     0            0            0          0
+    ##   Tulane                     0            0            0          3
+    ##                   
+    ##                    Nick Saban
+    ##   Alabama                  17
+    ##   Central Michigan          0
+    ##   Cincinnati                0
+    ##   Clemson                   0
+    ##   Iowa                      0
+    ##   LSU                       5
+    ##   Michigan State            5
+    ##   North Carolina            0
+    ##   Notre Dame                0
+    ##   Texas                     0
+    ##   Toledo                    1
+    ##   Tulane                    0
+
+``` r
+coaches_wins <- bind_coaches %>%
+  group_by(coach) %>%
+  summarise(total_wins = sum(wins))
+
+ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) + 
+    geom_bar(width = 1, stat = "identity", color = "black") + 
+    coord_polar("y", start = 0)+ 
+    geom_text(aes(label = total_wins),
+                   position = position_stack(vjust = 0.5),
+              color = "black")+ 
+    theme_void() +
+  labs(title = "Most Wins for Active Head Coaches") +
+  scale_fill_discrete(name = "Coach") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+
+``` r
+table(venue_info()$state)
+```
+
+    ## 
+    ##      AL  AR  AZ  BC  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID  IL  IN  KS  KY 
+    ##   4  22  15   7   1  27  12  11   6   3  24  22   2  17   3  32  21   8  11 
+    ##  LA  MA  MD  ME  MI  MN  MO  MS  MT  NC  ND  NE  NH  NJ  NM NSW  NV  NY  OH 
+    ##  13  32  12   7  23  28  21  10   3  37   5   6   5  13   5   1   3  35  44 
+    ##  OK  OR  PA  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
+    ##  12  11  57   4  16  10  20  56   6  27   3   9  19  14   1
+
+``` r
+high_capacity <- venue_info() %>%
+  arrange(desc(capacity)) %>%
+  select(name, capacity) %>%
+  top_n(5)
+
+ggplot(high_capacity, aes(reorder(name, -capacity), 
+                          y = capacity,
+                          fill = name)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Stadium",
+       y = "Capacity",
+       title = "Top 5 Stadiums with Highest Capacity") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  geom_text(aes(label = round(capacity, 2)), 
+            size = 3, 
+            position = position_stack(vjust = 0.8))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
