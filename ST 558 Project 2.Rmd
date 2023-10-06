@@ -3,7 +3,7 @@ title: 'CFBD-API-Vignette'
 author: "Chandler Ellsworth"
 output: rmarkdown::github_document
 ---
-
+TEST
 This document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
 
 The functions will be used in this document to obtain data from the API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
