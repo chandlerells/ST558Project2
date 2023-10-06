@@ -308,7 +308,7 @@ To help visualize this, I will plot the 10 highest average talent
 rankings with a bar chart.
 
 ``` r
-#create vector for differernt seasons
+#create vector for different seasons
 years <- c(2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
 #create empty list to append data frames from for loop
 listy <- list()
@@ -349,9 +349,9 @@ ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> It looks like
-there is a fairly large drop off after the first three schools, with
-`Alabama` dominating over the past 10 seasons. There is a material
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- --> It looks
+like there is a fairly large drop off after the first three schools,
+with `Alabama` dominating over the past 10 seasons. There is a material
 difference between Alabama and Michigan, the first and tenth highest
 average rankings. Luckily my alma mater, `Texas A&M`, cracks the top 10!
 
@@ -381,13 +381,52 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- --> It looks like
-from the heat map that `Alabama` has consistently remained top of the
-list for each of the individual 10 seasons. `Georgia` and `Ohio State`
-seem to have done a great job over the last 10 season bringing in top
-talent, slowly increasing their overall talent rankings. `USC` on the
-other hand, seems to have slightly regressed over the top 10 seasons in
-the talent they are bringing in.
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- --> It looks
+like from the heat map that `Alabama` has consistently remained top of
+the list for each of the individual 10 seasons. `Georgia` and
+`Ohio State` seem to have done a great job over the last 10 season
+bringing in top talent, slowly increasing their overall talent rankings.
+`USC` on the other hand, seems to have slightly regressed over the top
+10 seasons in the talent they are bringing in.
+
+We can also gauge a measure of spread for each team by looking at the
+standard deviation of composite rankings. This is done very similarly to
+the average talent but, using the `sd` function, and filtering on the
+relevant schools.
+
+``` r
+#filter the talent df for the relevant schools of interest
+sd <- talent %>%
+  filter(school %in% listy2) %>%
+  #group by school
+  group_by(school) %>%
+  #use sd as the summary measure
+  summarise(sd_talent = round(sd(talent),2)) %>%
+  #sort descending
+  arrange(desc(sd_talent))
+
+sd
+```
+
+    ## # A tibble: 10 × 2
+    ##    school     sd_talent
+    ##    <chr>          <dbl>
+    ##  1 Texas A&M       52.2
+    ##  2 Georgia         48.2
+    ##  3 Clemson         46.0
+    ##  4 Texas           34.1
+    ##  5 USC             33.3
+    ##  6 Ohio State      32.6
+    ##  7 LSU             15.5
+    ##  8 Alabama         14.9
+    ##  9 Michigan        13.2
+    ## 10 Notre Dame      12.0
+
+Unfortunately for the school I care about most, it looks like
+`Texas A&M` has the most variability each year in their composite
+rankings for the schools of relevance. As suspected, `Alabama` has
+little variability in their scores, along with `Michigan` and
+`Notre Dame`, which are in a slighly lower tier.
 
 Lets see how well the average talent rankings translate to performance.
 One metric we can use to analyze this is looking at average margin of
@@ -451,7 +490,7 @@ ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 It looks like overall, the teams with the highest average talent, beat
 teams by a higher margin. `Clemson` and `Michigan` seem to be making a
@@ -461,6 +500,42 @@ of victory. Explanations to this could be based on the conference each
 team is in, as well as `USC`’s talent regressing over the past few years
 indicated by the heat map. `Alabama` remains at the top of both metrics,
 which is not surprising.
+
+Similarly to the composite rankings, we can see a measure of spread
+across the 10 seasons by looking at the standard deviation of the margin
+of victory using the sd function under summarise.
+
+``` r
+bind_gr_sd <- bind_game_results %>%
+  #group by team
+  group_by(team) %>%
+  #use sd as the summarise measure, rounding to two decimals
+  summarise(sd_point_margin = round(sd(point_diff),2)) %>%
+  #arrange in descending order
+  arrange(desc(sd_point_margin))
+
+bind_gr_sd
+```
+
+    ## # A tibble: 10 × 2
+    ##    team       sd_point_margin
+    ##    <chr>                <dbl>
+    ##  1 Texas A&M             22.2
+    ##  2 Michigan              22.1
+    ##  3 LSU                   21.2
+    ##  4 Ohio State            21.1
+    ##  5 Georgia               20.2
+    ##  6 Clemson               20.1
+    ##  7 Texas                 19.6
+    ##  8 USC                   19.3
+    ##  9 Notre Dame            18.4
+    ## 10 Alabama               18.1
+
+Also similar to the results of the standard deviation of composite
+rankings, `Texas A&M` has the most variability over the 10 season period
+in terms of margin of victory. `Alabama` has the least variability,
+meaning they are going to be more consistent across seasons in terms of
+their margin of victory.
 
 We can also dive into more specific metrics, such as how each of these
 teams scores their touchdowns, to give them the margin of victories they
@@ -517,7 +592,7 @@ ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
                             guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 While there doesn’t seem to be much variation in interception, kick
 return, or punt return touchdowns across the teams, there is for more
@@ -563,19 +638,19 @@ ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 While these were not the results that I was expecting, as I suspected
 there to be a clear team that brought in the greatest attendance, there
-is an interesting observation. It seems Alabama fans were very
+is an interesting observation. It seems `Alabama` fans were very
 consistent for all conference home games from 2014 to 2019. However, it
-seems overall attendance at Alabama home conference games has declined
+seems overall attendance at `Alabama` home conference games has declined
 after that. Obviously, COVID played a huge role for a few years, but I
 wonder how much of this has to do with new TV rights, and the greater
 accessibility and cost savings to watch games at home.
 
 We can further see these results from the table below. This was done by
-filtering the Alabama data set, grouping by away team, finding mean
+filtering the `Alabama` data set, grouping by away team, finding mean
 average attendance, and arranging the results in descending order.
 
 ``` r
@@ -611,7 +686,7 @@ these are not traditionally well known rivals.
 There was also a metric for excitement index for each game, so we can
 see if the highest attendance translates to the highest excitement index
 for each of the home conference games. This can be done similarly to
-grouping by away team,finding the average excitement level, and
+grouping by away team, finding the average excitement level, and
 arranging in descending order.
 
 ``` r
@@ -648,17 +723,30 @@ suspect `Georgia` and `Florida` are so high since they are in the
 eastern part of the conference, so `Alabama` does not play them at home
 very often.
 
+Lets now take a look at the win totals for the most tenured active head
+coaches and how they compare across different schools. To do this, we’ll
+look at some of the most relevant coaches such as `Nick Saban`,
+`Mack Brown`, `Kirk Ferentz`, `Brian Kelly`, and `Dabo Swinney`. We’ll
+first need to create a data frame with corresponding columns of first
+and last name, as that is the arguments for the `coaching_history`
+function. We’ll need to create a new column in the data frame for the
+full coaches name, and merge the data frames together. We can first look
+at a contingency table of each coach, and the number of season they had
+at different schools
+
 ``` r
+#create a data frame of the first and last name of the coaches of interest
 coach <- data.frame(first_name = c("Nick", "Mack", "Kirk", "Brian", "Dabo"),
            last_name = c("Saban", "Brown", "Ferentz", "Kelly", "Swinney"))
-
+#apply the coaching history function across each row corresponding the first and
+# last name of each coach. Add a new column for the full name
 coaches <- apply(coach, MARGIN = 1, 
                   FUN = function(x) {
                   tib <- coaching_history(x[1],x[2])
                   mutate(tib, coach = paste(x[1], x[2]))})
-
+#merge all the data frames together
 bind_coaches <- bind_rows(coaches)
-
+#look at a two way contingency table of school and coach
 table(bind_coaches$school, bind_coaches$coach)
 ```
 
@@ -691,24 +779,88 @@ table(bind_coaches$school, bind_coaches$coach)
     ##   Toledo                    1
     ##   Tulane                    0
 
+While all of these coaches have had numerous seasons as head coaches in
+college football, it looks like `Mack Brown` is the only coach that
+hasn’t had all of his time spent primarily at one school. His time has
+almost been equally spent at `North Carolina` and `Texas`. `Dabo` and
+`Kirk` on the other hand, are the two coaches who have spent their
+entire tenure at one school.
+
+Of the coaches of interest, lets see how they stack up against one
+another in terms of total wins. We can do this by grouping by coach on
+the consolidated data frame, and summing total wins. We can then
+visualize this with a pie chart.
+
 ``` r
+#group bind coaches by coach and sum for total wins
 coaches_wins <- bind_coaches %>%
   group_by(coach) %>%
   summarise(total_wins = sum(wins))
-
+#fill by coach
 ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) + 
-    geom_bar(width = 1, stat = "identity", color = "black") + 
-    coord_polar("y", start = 0)+ 
-    geom_text(aes(label = total_wins),
+  #create pie chart with geom bar and coord polar
+  #set stat to identity since we already have the sum
+  geom_bar(width = 1, stat = "identity", color = "black") + 
+  coord_polar("y", start = 0)+ 
+  #add data points for the total number of wins
+  geom_text(aes(label = total_wins),
                    position = position_stack(vjust = 0.5),
-              color = "black")+ 
-    theme_void() +
+              color = "black")+
+  #theme used
+  theme_void() +
+  #add title and center it
   labs(title = "Most Wins for Active Head Coaches") +
   scale_fill_discrete(name = "Coach") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+
+It looks like `Nick Saban` and `Mack Brown` are the two active coaches
+that have the most wins and by a good margin. I think this relates well
+to our initial question of interest, analyzing team performance. A great
+coach seems paramount in college football to having a successful team
+for years to come. This can be seen by `Nick Saban`, the head coach of
+`Alabama`, with the most wins. `Mack Brown` also had a huge impact at
+`Texas`, before he left for North Carolina, and is slowly starting to
+increase the success of `North Carolina`’s football team.
+
+Lastly, lets take a look at the `top 5 college football stadiums` with
+the `largest capacity`. We can do this by running the `venue_info`
+function, arranging the capacity in descending order, and selecting the
+top 5. We can visualize this with a bar chart.
+
+``` r
+#arrange the output of venue info descending, selecting relevant columns and selcting top 5
+high_capacity <- venue_info() %>%
+  arrange(desc(capacity)) %>%
+  select(name, capacity) %>%
+  top_n(5)
+#fill by stadium name, reorder from largest to smallest
+ggplot(high_capacity, aes(reorder(name, -capacity), 
+                          y = capacity,
+                          fill = name)) +
+  #create a bar chart
+  geom_bar(stat = "identity") +
+  #add appropriate labels
+  labs(x = "Stadium",
+       y = "Capacity",
+       title = "Top 5 Stadiums with Highest Capacity") +
+  #move title to center
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  #add data labels for capacity
+  geom_text(aes(label = round(capacity, 2)), 
+            size = 3, 
+            position = position_stack(vjust = 0.8))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+
+We can also look at a contingency table of the number of stadiums in
+each state. It is not surprising that the states
+`Texas and Pennsylvania` have the two largest number of stadium counts,
+as football is quite popular in these states.
 
 ``` r
 table(venue_info()$state)
@@ -721,25 +873,3 @@ table(venue_info()$state)
     ##  13  32  12   7  23  28  21  10   3  37   5   6   5  13   5   1   3  35  44 
     ##  OK  OR  PA  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
     ##  12  11  57   4  16  10  20  56   6  27   3   9  19  14   1
-
-``` r
-high_capacity <- venue_info() %>%
-  arrange(desc(capacity)) %>%
-  select(name, capacity) %>%
-  top_n(5)
-
-ggplot(high_capacity, aes(reorder(name, -capacity), 
-                          y = capacity,
-                          fill = name)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Stadium",
-       y = "Capacity",
-       title = "Top 5 Stadiums with Highest Capacity") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  geom_text(aes(label = round(capacity, 2)), 
-            size = 3, 
-            position = position_stack(vjust = 0.8))
-```
-
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->

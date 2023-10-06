@@ -258,7 +258,7 @@ Now that we have functions that can be utilized to query on different endpoint o
 First, I need to create a vector of the last 10 seasons and create an empty list that multiple data frames can be appended to. For the sake of practicing different methods, I am going to perform a `for loop` for this task. I will loop through each of the seasons, run the `team_talent_composite_rankings` function and group by the school, finding the average talent for each team, sorted from highest to lowest. To help visualize this, I will plot the 10 highest average talent rankings with a bar chart.
 
 ```{r}
-#create vector for differernt seasons
+#create vector for different seasons
 years <- c(2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023)
 #create empty list to append data frames from for loop
 listy <- list()
@@ -325,6 +325,23 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
 ```
 It looks like from the heat map that `Alabama` has consistently remained top of the list for each of the individual 10 seasons. `Georgia` and `Ohio State` seem to have done a great job over the last 10 season bringing in top talent, slowly increasing their overall talent rankings. `USC` on the other hand, seems to have slightly regressed over the top 10 seasons in the talent they are bringing in.
 
+We can also gauge a measure of spread for each team by looking at the standard deviation of composite rankings. This is done very similarly to the average talent but, using the `sd` function, and filtering on the relevant schools.
+
+```{r}
+#filter the talent df for the relevant schools of interest
+sd <- talent %>%
+  filter(school %in% listy2) %>%
+  #group by school
+  group_by(school) %>%
+  #use sd as the summary measure
+  summarise(sd_talent = round(sd(talent),2)) %>%
+  #sort descending
+  arrange(desc(sd_talent))
+
+sd
+```
+
+Unfortunately for the school I care about most, it looks like `Texas A&M` has the most variability each year in their composite rankings for the schools of relevance. As suspected, `Alabama` has little variability in their scores, along with `Michigan` and `Notre Dame`, which are in a slighly lower tier.
 
 Lets see how well the average talent rankings translate to performance. One metric we can use to analyze this is looking at average margin of victory over the last 10 seasons. The thought process here is that higher talent will make a team more likely to win games and at a higher margin.
 
@@ -378,6 +395,22 @@ ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin),
 ```
 
 It looks like overall, the teams with the highest average talent, beat teams by a higher margin. `Clemson` and `Michigan` seem to be making a great use of who the recruit, based on their composite rankings. `USC` seems to have higher talent, but not translating that as well to margin of victory. Explanations to this could be based on the conference each team is in, as well as `USC`'s talent regressing over the past few years indicated by the heat map. `Alabama` remains at the top of both metrics, which is not surprising.
+
+Similarly to the composite rankings, we can see a measure of spread across the 10 seasons by looking at the standard deviation of the margin of victory using the sd function under summarise.
+
+```{r}
+bind_gr_sd <- bind_game_results %>%
+  #group by team
+  group_by(team) %>%
+  #use sd as the summarise measure, rounding to two decimals
+  summarise(sd_point_margin = round(sd(point_diff),2)) %>%
+  #arrange in descending order
+  arrange(desc(sd_point_margin))
+
+bind_gr_sd
+```
+
+Also similar to the results of the standard deviation of composite rankings, `Texas A&M` has the most variability over the 10 season period in terms of margin of victory. `Alabama` has the least variability, meaning they are going to be more consistent across seasons in terms of their margin of victory.
 
 We can also dive into more specific metrics, such as how each of these teams scores their touchdowns, to give them the margin of victories they each have. We will do this by using the `apply` function on the `team_season_stats` function across each combo of season and team. We will find averages for each of the statistics that include `TD` in them and plot using a scatter plot.
 
@@ -442,9 +475,9 @@ ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_
   
 ```
 
-While these were not the results that I was expecting, as I suspected there to be a clear team that brought in the greatest attendance, there is an interesting observation. It seems Alabama fans were very consistent for all conference home games from 2014 to 2019. However, it seems overall attendance at Alabama home conference games has declined after that. Obviously, COVID played a huge role for a few years, but I wonder how much of this has to do with new TV rights, and the greater accessibility and cost savings to watch games at home.
+While these were not the results that I was expecting, as I suspected there to be a clear team that brought in the greatest attendance, there is an interesting observation. It seems `Alabama` fans were very consistent for all conference home games from 2014 to 2019. However, it seems overall attendance at `Alabama` home conference games has declined after that. Obviously, COVID played a huge role for a few years, but I wonder how much of this has to do with new TV rights, and the greater accessibility and cost savings to watch games at home.
 
-We can further see these results from the table below. This was done by filtering the Alabama data set, grouping by away team, finding mean average attendance, and arranging the results in descending order.
+We can further see these results from the table below. This was done by filtering the `Alabama` data set, grouping by away team, finding mean average attendance, and arranging the results in descending order.
 
 ```{r}
 #group by away team, summarize by mean of attendance, and arrange descending
@@ -458,7 +491,7 @@ bama_results_avg
 
 While there seems to be similar averages for many of the conference teams, I am surprised by `Missouri` and `Florida` being at the top, as these are not traditionally well known rivals.
 
-There was also a metric for excitement index for each game, so we can see if the highest attendance translates to the highest excitement index for each of the home conference games. This can be done similarly to grouping by away team,finding the average excitement level, and arranging in descending order.
+There was also a metric for excitement index for each game, so we can see if the highest attendance translates to the highest excitement index for each of the home conference games. This can be done similarly to grouping by away team, finding the average excitement level, and arranging in descending order.
 
 ```{r}
 #group by away team, summarize by mean of excitement index, and arrange descending
@@ -472,60 +505,84 @@ bama_excitement_avg
 
 As I suspected, `Missouri` does not seem to be as important of a game compared to some of the well known top programs, so it's interesting they get such a high attendance. It make sense for `Georgia` to have the highest average excitement level, followed by the subsequent teams. I suspect `Georgia` and `Florida` are so high since they are in the eastern part of the conference, so `Alabama` does not play them at home very often.
 
+Lets now take a look at the win totals for the most tenured active head coaches and how they compare across different schools. To do this, we'll look at some of the most relevant coaches such as `Nick Saban`, `Mack Brown`, `Kirk Ferentz`, `Brian Kelly`, and `Dabo Swinney`. We'll first need to create a data frame with corresponding columns of first and last name, as that is the arguments for the `coaching_history` function. We'll need to create a new column in the data frame for the full coaches name, and merge the data frames together. We can first look at a contingency table of each coach, and the number of season they had at different schools
+
 ```{r}
+#create a data frame of the first and last name of the coaches of interest
 coach <- data.frame(first_name = c("Nick", "Mack", "Kirk", "Brian", "Dabo"),
            last_name = c("Saban", "Brown", "Ferentz", "Kelly", "Swinney"))
-
+#apply the coaching history function across each row corresponding the first and
+# last name of each coach. Add a new column for the full name
 coaches <- apply(coach, MARGIN = 1, 
                   FUN = function(x) {
                   tib <- coaching_history(x[1],x[2])
                   mutate(tib, coach = paste(x[1], x[2]))})
-
+#merge all the data frames together
 bind_coaches <- bind_rows(coaches)
-
+#look at a two way contingency table of school and coach
 table(bind_coaches$school, bind_coaches$coach)
 ```
 
-```{r}
+While all of these coaches have had numerous seasons as head coaches in college football, it looks like `Mack Brown` is the only coach that hasn't had all of his time spent primarily at one school. His time has almost been equally spent at `North Carolina` and `Texas`. `Dabo` and `Kirk` on the other hand, are the two coaches who have spent their entire tenure at one school.
 
+Of the coaches of interest, lets see how they stack up against one another in terms of total wins. We can do this by grouping by coach on the consolidated data frame, and summing total wins. We can then visualize this with a pie chart.
+
+```{r}
+#group bind coaches by coach and sum for total wins
 coaches_wins <- bind_coaches %>%
   group_by(coach) %>%
   summarise(total_wins = sum(wins))
-
+#fill by coach
 ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) + 
-    geom_bar(width = 1, stat = "identity", color = "black") + 
-    coord_polar("y", start = 0)+ 
-    geom_text(aes(label = total_wins),
+  #create pie chart with geom bar and coord polar
+  #set stat to identity since we already have the sum
+  geom_bar(width = 1, stat = "identity", color = "black") + 
+  coord_polar("y", start = 0)+ 
+  #add data points for the total number of wins
+  geom_text(aes(label = total_wins),
                    position = position_stack(vjust = 0.5),
-              color = "black")+ 
-    theme_void() +
+              color = "black")+
+  #theme used
+  theme_void() +
+  #add title and center it
   labs(title = "Most Wins for Active Head Coaches") +
   scale_fill_discrete(name = "Coach") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+It looks like `Nick Saban` and `Mack Brown` are the two active coaches that have the most wins and by a good margin. I think this relates well to our initial question of interest, analyzing team performance. A great coach seems paramount in college football to having a successful team for years to come. This can be seen by `Nick Saban`, the head coach of `Alabama`, with the most wins. `Mack Brown` also had a huge impact at `Texas`, before he left for North Carolina, and is slowly starting to increase the success of `North Carolina`'s football team.
+
+Lastly, lets take a look at the `top 5 college football stadiums` with the `largest capacity`. We can do this by running the `venue_info` function, arranging the capacity in descending order, and selecting the top 5. We can visualize this with a bar chart.
 
 ```{r}
-table(venue_info()$state)
-
+#arrange the output of venue info descending, selecting relevant columns and selcting top 5
 high_capacity <- venue_info() %>%
   arrange(desc(capacity)) %>%
   select(name, capacity) %>%
   top_n(5)
-
+#fill by stadium name, reorder from largest to smallest
 ggplot(high_capacity, aes(reorder(name, -capacity), 
                           y = capacity,
                           fill = name)) +
+  #create a bar chart
   geom_bar(stat = "identity") +
+  #add appropriate labels
   labs(x = "Stadium",
        y = "Capacity",
        title = "Top 5 Stadiums with Highest Capacity") +
+  #move title to center
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  #add data labels for capacity
   geom_text(aes(label = round(capacity, 2)), 
             size = 3, 
             position = position_stack(vjust = 0.8))
 ```
 
+We can also look at a contingency table of the number of stadiums in each state. It is not surprising that the states `Texas and Pennsylvania` have the two largest number of stadium counts, as football is quite popular in these states.
+
+```{r}
+table(venue_info()$state)
+```
 
 
