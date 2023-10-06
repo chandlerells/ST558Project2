@@ -349,9 +349,9 @@ ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- --> It looks
-like there is a fairly large drop off after the first three schools,
-with `Alabama` dominating over the past 10 seasons. There is a material
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> It looks like
+there is a fairly large drop off after the first three schools, with
+`Alabama` dominating over the past 10 seasons. There is a material
 difference between Alabama and Michigan, the first and tenth highest
 average rankings. Luckily my alma mater, `Texas A&M`, cracks the top 10!
 
@@ -381,13 +381,13 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- --> It looks
-like from the heat map that `Alabama` has consistently remained top of
-the list for each of the individual 10 seasons. `Georgia` and
-`Ohio State` seem to have done a great job over the last 10 season
-bringing in top talent, slowly increasing their overall talent rankings.
-`USC` on the other hand, seems to have slightly regressed over the top
-10 seasons in the talent they are bringing in.
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- --> It looks like
+from the heat map that `Alabama` has consistently remained top of the
+list for each of the individual 10 seasons. `Georgia` and `Ohio State`
+seem to have done a great job over the last 10 season bringing in top
+talent, slowly increasing their overall talent rankings. `USC` on the
+other hand, seems to have slightly regressed over the top 10 seasons in
+the talent they are bringing in.
 
 Lets see how well the average talent rankings translate to performance.
 One metric we can use to analyze this is looking at average margin of
@@ -411,41 +411,69 @@ combo <- expand.grid(years, listy2)
 #apply the game results function to each combo of season and team
 game_results_tib <- apply(combo, MARGIN = 1, 
                   FUN = function(x) {
+                    #first element is the season, second element is the team
                     tib <- game_results(x[1],x[2])
                     tib$team <- x[2]
+                    #use if else logic to check if the home team corresponds to the
+                    #team of relevance. If it is home team, to home - away points. If 
+                    # not do the opposite
                     if_else(tib$home_team == x[2], 
                             mutate(tib, point_diff = (home_points - away_points)), 
                                    mutate(tib, point_diff = (away_points - home_points)))})
-
+#bind all the data frame results together, filtering out any na values in
+# point differential as these were bad data points
 bind_game_results <- bind_rows(game_results_tib) %>%
   filter(!is.na(point_diff))
-
+#group the consolidated df by team, pulling in a summary of average point diff,
+#arranged highest to smallest
 bind_gr_avg <- bind_game_results %>%
   group_by(team) %>%
   summarise(avg_point_margin = mean(point_diff)) %>%
   arrange(desc(avg_point_margin))
-
+#use reorder to get the bar chart results in descending order, filled by team
 ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin), 
                          y = avg_point_margin,
                          fill = team)) +
+  #since we already calculated the average, make the stat to identity
   geom_bar(stat = "identity") + 
+  #add appropriate labels
   labs(x = "School",
        y = "Average Margin of Victory",
        title = "Average Margin of Victory Over Past 10 Years") +
   scale_fill_discrete(name = "School") +
+  #move chart tile to the center
   theme(plot.title = element_text(hjust = 0.5)) +
+  #make sure no overlapping labels on x axis
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  #add data labels for each school
   geom_text(aes(label = round(avg_point_margin, 2)), 
             size = 3, 
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+It looks like overall, the teams with the highest average talent, beat
+teams by a higher margin. `Clemson` and `Michigan` seem to be making a
+great use of who the recruit, based on their composite rankings. `USC`
+seems to have higher talent, but not translating that as well to margin
+of victory. Explanations to this could be based on the conference each
+team is in, as well as `USC`’s talent regressing over the past few years
+indicated by the heat map. `Alabama` remains at the top of both metrics,
+which is not surprising.
+
+We can also dive into more specific metrics, such as how each of these
+teams scores their touchdowns, to give them the margin of victories they
+each have. We will do this by using the `apply` function on the
+`team_season_stats` function across each combo of season and team. We
+will find averages for each of the statistics that include `TD` in them
+and plot using a scatter plot.
 
 ``` r
+#apply the team season stats function to each combo of season and team
 team_stat_tib <- apply(combo, MARGIN = 1, 
                   FUN = function(x) team_season_stats(x[1],x[2]))
-
+#merge all the data frames together
 team_stat <- bind_rows(team_stat_tib)
 team_stat
 ```
@@ -466,48 +494,92 @@ team_stat
     ## # ℹ 3,150 more rows
 
 ``` r
+#take the consolidated df and group by team and stat value, summarizing averages
+#for each stat value and filtering on only the stat values that have the word TD
 team_stat_avg <- team_stat %>%
   group_by(team, statName) %>%
   summarise(avg_stat_value = mean(statValue), .groups = 'keep') %>%
   filter(grepl('TDs', statName))
-
+#color by team
 ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
-  geom_point() +
-  labs(x = "Stat",
+  #create a scatter plot that is jittered, so similar values how up next to each other
+  geom_jitter() +
+  #add appropriate labels
+  labs(x = "Metric",
        y = "Average",
        title = "Average TD Counts Over Past 10 Years by School") +
   scale_color_discrete(name = "School") +
+  #move chart tile to center
   theme(plot.title = element_text(hjust = 0.5)) +
+  #Change the x axis label names to be more interpretable
   scale_x_discrete(labels = c('Interception TDs', 'Kick Return TDs', 'Passing TDs', 
                             'Punt Return TDs', 'Rushing TDs'),
                             guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+While there doesn’t seem to be much variation in interception, kick
+return, or punt return touchdowns across the teams, there is for more
+common ways of scoring, such as passing or rushing touchdowns. `Alabama`
+and `Ohio State` had the largest average margin of victories over the
+past 10 seasons, and they both seem to score most of their touchdowns
+through the air, by passing. `Clemson`, who was ranked 3rd, seems to
+score the majority of their touchdown from rushing. Both options are
+great and need to be maximized, but maybe `Alabama` and `Ohio State`’s
+recent success is telling of how vital passing touchdowns are.
+
+Just for fun, since `Alabama` seems to be the highly favored team
+according to everything we’ve looked at thus far, lets see which
+conference team brings in the greatest home attendance each season. To
+do this we’ll need to use `lapply` to apply the `game_results` function
+to the years list. To only look at conference home games, we’ll filter
+on the `Bryant Denny Stadium` and `SEC` for conference. After we merge
+the results, we’ll plot the results by away school.
 
 ``` r
+#apply game results to each season
 bama_results_tib <- lapply(years,
                   FUN = function(x) {
                     tib <- game_results(x[1],"Alabama")
+                    #filter for only home and conference games
                     filter(tib, !is.na(attendance), 
                            venue == "Bryant Denny Stadium",
                            away_conference == "SEC")})
-
+#merge the results together
 bama_results <- bind_rows(bama_results_tib)
-
+#for scale, make the attendance in thousands, color by away team
 ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_team)) +
+  #jitter scatter plot
   geom_jitter() +
+  #set the limit for y axis to get closer look
   ylim(95, 103) + 
+  #add appropriate labels
   labs(x = "Season",
        y = "Attendance ('000s)",
        title = "Alabama Home Game Attendence Over Past 10 Years by School") +
   scale_color_discrete(name = "School") +
+  #move chart to the center
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+While these were not the results that I was expecting, as I suspected
+there to be a clear team that brought in the greatest attendance, there
+is an interesting observation. It seems Alabama fans were very
+consistent for all conference home games from 2014 to 2019. However, it
+seems overall attendance at Alabama home conference games has declined
+after that. Obviously, COVID played a huge role for a few years, but I
+wonder how much of this has to do with new TV rights, and the greater
+accessibility and cost savings to watch games at home.
+
+We can further see these results from the table below. This was done by
+filtering the Alabama data set, grouping by away team, finding mean
+average attendance, and arranging the results in descending order.
 
 ``` r
+#group by away team, summarize by mean of attendance, and arrange descending
 bama_results_avg <- bama_results %>%
   group_by(away_team) %>%
   summarise(avg_attendance = mean(attendance)) %>%
@@ -532,7 +604,18 @@ bama_results_avg
     ## 11 Kentucky                  60622.
     ## 12 Georgia                   19424
 
+While there seems to be similar averages for many of the conference
+teams, I am surprised by `Missouri` and `Florida` being at the top, as
+these are not traditionally well known rivals.
+
+There was also a metric for excitement index for each game, so we can
+see if the highest attendance translates to the highest excitement index
+for each of the home conference games. This can be done similarly to
+grouping by away team,finding the average excitement level, and
+arranging in descending order.
+
 ``` r
+#group by away team, summarize by mean of excitement index, and arrange descending
 bama_excitement_avg <- bama_results %>%
   group_by(away_team) %>%
   summarise(avg_excitement = mean(round(as.numeric(excitement_index),0))) %>%
@@ -557,26 +640,13 @@ bama_excitement_avg
     ## 11 Vanderbilt                  1   
     ## 12 Missouri                    0
 
-``` r
-bama_results
-```
-
-    ## # A tibble: 37 × 10
-    ##    season  week away_conference attendance venue       home_team home_points
-    ##     <int> <int> <chr>                <int> <chr>       <chr>           <int>
-    ##  1   2014     4 SEC                 101821 Bryant Den… Alabama            42
-    ##  2   2014     8 SEC                 101821 Bryant Den… Alabama            59
-    ##  3   2014    12 SEC                 101821 Bryant Den… Alabama            25
-    ##  4   2014    14 SEC                 101821 Bryant Den… Alabama            55
-    ##  5   2015     3 SEC                 101821 Bryant Den… Alabama            37
-    ##  6   2015     6 SEC                 101821 Bryant Den… Alabama            27
-    ##  7   2015     8 SEC                 101821 Bryant Den… Alabama            19
-    ##  8   2015    10 SEC                 101821 Bryant Den… Alabama            30
-    ##  9   2016     5 SEC                 101821 Bryant Den… Alabama            34
-    ## 10   2016     8 SEC                 101821 Bryant Den… Alabama            33
-    ## # ℹ 27 more rows
-    ## # ℹ 3 more variables: away_team <chr>, away_points <int>,
-    ## #   excitement_index <chr>
+As I suspected, `Missouri` does not seem to be as important of a game
+compared to some of the well known top programs, so it’s interesting
+they get such a high attendance. It make sense for `Georgia` to have the
+highest average excitement level, followed by the subsequent teams. I
+suspect `Georgia` and `Florida` are so high since they are in the
+eastern part of the conference, so `Alabama` does not play them at home
+very often.
 
 ``` r
 coach <- data.frame(first_name = c("Nick", "Mack", "Kirk", "Brian", "Dabo"),
@@ -638,7 +708,7 @@ ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 table(venue_info()$state)
@@ -672,4 +742,4 @@ ggplot(high_capacity, aes(reorder(name, -capacity),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
