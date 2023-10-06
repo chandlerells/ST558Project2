@@ -13,7 +13,7 @@ Chandler Ellsworth
 - [Exploratory Data Analysis](#exploratory-data-analysis)
 - [Wrap Up](#wrap-up)
 
-This document is a vignette about contacting the
+TEST This document is a vignette about contacting the
 `CollegeFootballData.com` (CFBD) API using created functions to query,
 parse, and return well-structured data. CFBD is a sports statistics and
 analytics website with no direct affiliation to the NCAA, its member
