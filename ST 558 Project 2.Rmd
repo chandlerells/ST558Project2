@@ -3,6 +3,7 @@ title: 'ST 558: Project 2'
 author: "Chandler Ellsworth"
 date: "2023-10-02"
 output:
+  html_document:
   toc: true
   toc_depth: 2
   toc_float: true

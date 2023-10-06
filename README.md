@@ -3,10 +3,16 @@ ST 558: Project 2
 Chandler Ellsworth
 2023-10-02
 
-- [1 Requirment Packages](#1-requirment-packages)
-- [2 API Interaction Functions](#2-api-interaction-functions)
-- [3 Exploratory Data Analysis](#3-exploratory-data-analysis)
-- [4 Wrap Up](#4-wrap-up)
+- [Requirment Packages](#requirment-packages)
+- [API Interaction Functions](#api-interaction-functions)
+  - [`team_talent_composite_ranking`](#team_talent_composite_ranking)
+  - [coaching_history](#coaching_history)
+  - [`team_season_stats`](#team_season_stats)
+  - [`game_results`](#game_results)
+  - [`team_records`](#team_records)
+  - [`venue_info`](#venue_info)
+- [Exploratory Data Analysis](#exploratory-data-analysis)
+- [Wrap Up](#wrap-up)
 
 The document is a vignette about contacting the
 `CollegeFootballData.com` (CFBD) API using created functions to query,
@@ -25,7 +31,7 @@ used to gather the following types of data:
 - ending record for a particular season and team  
 - general information for college football venues
 
-# 1 Requirment Packages
+# Requirment Packages
 
 The following packages were used to interact with the CFBD API:
 
@@ -36,12 +42,12 @@ The following packages were used to interact with the CFBD API:
   science  
 - `ggplot2`: Great open-source data visualization package
 
-# 2 API Interaction Functions
+# API Interaction Functions
 
 The following section will lay out the created functions described above
 in more detail.
 
-### 2.0.1 `team_talent_composite_ranking`
+### `team_talent_composite_ranking`
 
 This function allows the user to query on a specific football season
 (year) and return talent composite rankings in the form of a tibble. If
@@ -75,7 +81,7 @@ team_talent_composite_rankings <- function(year) {
 }
 ```
 
-### 2.0.2 coaching_history
+### coaching_history
 
 This function allows the user to analyze the performance history of a
 specific coach, such as wins, losses, rankings, schools, etc. The
@@ -107,7 +113,7 @@ coaching_history <- function(first_name, last_name) {
 }
 ```
 
-### 2.0.3 `team_season_stats`
+### `team_season_stats`
 
 This function allows the user to analyze high level team stats for a
 particular season and team. Stats are relevant to both the offensive and
@@ -157,7 +163,7 @@ team_season_stats <- function(year, team) {
 }
 ```
 
-### 2.0.4 `game_results`
+### `game_results`
 
 This function allows the user to at high level game results for a
 particular season and team such as scores, teams, attendance, and week.
@@ -206,7 +212,7 @@ game_results <- function(year, team) {
 }
 ```
 
-### 2.0.5 `team_records`
+### `team_records`
 
 This simple function allows the user to return the record for a specific
 year and team. The required arguments, with no defaults, are `year` and
@@ -250,7 +256,7 @@ team_records <- function(year, team) {
 }
 ```
 
-### 2.0.6 `venue_info`
+### `venue_info`
 
 The function allows the user to see high level information for the
 different venues in college football. The only argument that is
@@ -287,7 +293,7 @@ venue_info <- function(venue_name = NULL) {
 }
 ```
 
-# 3 Exploratory Data Analysis
+# Exploratory Data Analysis
 
 Now that we have functions that can be utilized to query on different
 endpoint of the CFDB API, let do some basic exploratory data analysis.
@@ -845,7 +851,7 @@ table(venue_info()$state)
     ##  OK  OR  PA  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
     ##  12  11  57   4  16  10  20  56   6  27   3   9  19  14   1
 
-# 4 Wrap Up
+# Wrap Up
 
 To conclude this vignette, I made functions to query the CFBD API for
 different endpoints and utilized them for basic exploratory data
