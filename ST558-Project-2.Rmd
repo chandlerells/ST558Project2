@@ -1,9 +1,8 @@
 ---
 title: 'CFBD-API-Vignette'
 author: "Chandler Ellsworth"
-output: rmarkdown::github_document
 ---
-TEST
+
 This document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
 
 The functions will be used in this document to obtain data from the API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
@@ -22,14 +21,12 @@ The following packages were used to interact with the CFBD API:
 * `httr2` Tools for creating and modifying HTTP request, then performing them and processing the results  
 * `jsonlite`: JSON parser/generator optimized for the web  
 * `tidyverse`: Opinionated collection of R packages designed for data science  
-* `ggplot2`: Great open-source data visualization package
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(httr2)
 library(jsonlite)
 library(tidyverse)
-library(ggplot2)
 ```
 
 # API Interaction Functions 
