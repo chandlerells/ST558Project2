@@ -358,7 +358,7 @@ ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 It looks like there is a fairly large drop off after the first three
 schools, with `Alabama` dominating over the past 10 seasons. There is a
@@ -392,7 +392,7 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 It looks like from the heat map that `Alabama` has consistently remained
 top of the list for each of the individual 10 seasons. `Georgia` and
@@ -496,7 +496,7 @@ ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 It looks like overall, the teams with the highest average talent, beat
 teams by a higher margin. `Clemson` and `Michigan` seem to be making a
@@ -573,7 +573,7 @@ ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
                             guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 While there doesn’t seem to be much variation in interception, kick
 return, or punt return touchdowns across the teams, there is for more
@@ -619,7 +619,7 @@ ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 While these were not the results that I was expecting, as I suspected
 there to be a clear team that brought in the greatest attendance, there
@@ -779,7 +779,7 @@ ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 It looks like `Nick Saban` and `Mack Brown` are the two active coaches
 that have the most wins and by a good margin. I think this relates well
@@ -820,7 +820,7 @@ ggplot(high_capacity, aes(reorder(name, -capacity),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 We can also look at a contingency table of the number of stadiums in
 each state. It is not surprising that the states
