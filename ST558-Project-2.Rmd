@@ -402,7 +402,7 @@ bind_gr_sd <- bind_game_results %>%
   #arrange in descending order
   arrange(desc(sd_point_margin))
 
-bind_gr_sd
+print(bind_gr_sd)
 ```
 
 Also similar to the results of the standard deviation of composite rankings, `Texas A&M` has the most variability over the 10 season period in terms of margin of victory. `Alabama` has the least variability, meaning they are going to be more consistent across seasons in terms of their margin of victory.
@@ -480,7 +480,7 @@ bama_results_avg <- bama_results %>%
   summarise(avg_attendance = mean(attendance)) %>%
   arrange(desc(avg_attendance))
 
-bama_results_avg
+print(bama_results_avg)
 ```
 
 While there seems to be similar averages for many of the conference teams, I am surprised by `Missouri` and `Florida` being at the top, as these are not traditionally well known rivals.
@@ -494,7 +494,7 @@ bama_excitement_avg <- bama_results %>%
   summarise(avg_excitement = mean(round(as.numeric(excitement_index),0))) %>%
   arrange(desc(avg_excitement))
 
-bama_excitement_avg
+print(bama_excitement_avg)
 ```
 
 As I suspected, `Missouri` does not seem to be as important of a game compared to some of the well known top programs, so it's interesting they get such a high attendance. It make sense for `Georgia` to have the highest average excitement level, followed by the subsequent teams. I suspect `Georgia` and `Florida` are so high since they are in the eastern part of the conference, so `Alabama` does not play them at home very often.
