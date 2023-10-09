@@ -24,6 +24,7 @@ The following packages were used to interact with the CFBD API:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+
 library(httr2)
 library(jsonlite)
 library(tidyverse)
