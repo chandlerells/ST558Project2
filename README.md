@@ -358,7 +358,7 @@ ggplot(average[1:10,], aes(x = reorder(school, -average_talent),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 It looks like there is a fairly large drop off after the first three
 schools, with `Alabama` dominating over the past 10 seasons. There is a
@@ -392,7 +392,7 @@ ggplot(talent_filter, aes(x = school, y = year, fill = talent)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 It looks like from the heat map that `Alabama` has consistently remained
 top of the list for each of the individual 10 seasons. `Georgia` and
@@ -417,16 +417,22 @@ sd <- talent %>%
   #sort descending
   arrange(desc(sd_talent))
 
-sd
+print(sd)
 ```
 
-<div data-pagedtable="false">
-
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["school"],"name":[1],"type":["chr"],"align":["left"]},{"label":["sd_talent"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"Texas A&M","2":"52.20"},{"1":"Georgia","2":"48.15"},{"1":"Clemson","2":"46.04"},{"1":"Texas","2":"34.14"},{"1":"USC","2":"33.28"},{"1":"Ohio State","2":"32.64"},{"1":"LSU","2":"15.47"},{"1":"Alabama","2":"14.93"},{"1":"Michigan","2":"13.18"},{"1":"Notre Dame","2":"12.01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-
-</div>
+    ## # A tibble: 10 × 2
+    ##    school     sd_talent
+    ##    <chr>          <dbl>
+    ##  1 Texas A&M       52.2
+    ##  2 Georgia         48.2
+    ##  3 Clemson         46.0
+    ##  4 Texas           34.1
+    ##  5 USC             33.3
+    ##  6 Ohio State      32.6
+    ##  7 LSU             15.5
+    ##  8 Alabama         14.9
+    ##  9 Michigan        13.2
+    ## 10 Notre Dame      12.0
 
 Unfortunately for the school I care about most, it looks like
 `Texas A&M` has the most variability each year in their composite
@@ -496,7 +502,7 @@ ggplot(bind_gr_avg, aes(x = reorder(team, -avg_point_margin),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 It looks like overall, the teams with the highest average talent, beat
 teams by a higher margin. `Clemson` and `Michigan` seem to be making a
@@ -523,13 +529,19 @@ bind_gr_sd <- bind_game_results %>%
 bind_gr_sd
 ```
 
-<div data-pagedtable="false">
-
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["team"],"name":[1],"type":["chr"],"align":["left"]},{"label":["sd_point_margin"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"Michigan","2":"22.12"},{"1":"Texas A&M","2":"22.10"},{"1":"LSU","2":"21.11"},{"1":"Ohio State","2":"21.04"},{"1":"Georgia","2":"20.25"},{"1":"Clemson","2":"20.04"},{"1":"Texas","2":"19.48"},{"1":"USC","2":"19.24"},{"1":"Notre Dame","2":"18.45"},{"1":"Alabama","2":"18.13"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-
-</div>
+    ## # A tibble: 10 × 2
+    ##    team       sd_point_margin
+    ##    <chr>                <dbl>
+    ##  1 Michigan              22.1
+    ##  2 Texas A&M             22.1
+    ##  3 LSU                   21.1
+    ##  4 Ohio State            21.0
+    ##  5 Georgia               20.2
+    ##  6 Clemson               20.0
+    ##  7 Texas                 19.5
+    ##  8 USC                   19.2
+    ##  9 Notre Dame            18.4
+    ## 10 Alabama               18.1
 
 Also similar to the results of the standard deviation of composite
 rankings, `Texas A&M` has the most variability over the 10 season period
@@ -573,7 +585,7 @@ ggplot(team_stat_avg, aes(x = statName, y = avg_stat_value, color = team)) +
                             guide = guide_axis(n.dodge=2))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 While there doesn’t seem to be much variation in interception, kick
 return, or punt return touchdowns across the teams, there is for more
@@ -619,7 +631,7 @@ ggplot(bama_results, aes(x = round(season,0), y = attendance/1000, color = away_
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 While these were not the results that I was expecting, as I suspected
 there to be a clear team that brought in the greatest attendance, there
@@ -644,13 +656,21 @@ bama_results_avg <- bama_results %>%
 bama_results_avg
 ```
 
-<div data-pagedtable="false">
-
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["away_team"],"name":[1],"type":["chr"],"align":["left"]},{"label":["avg_attendance"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"Florida","2":"101821.0"},{"1":"Missouri","2":"101821.0"},{"1":"LSU","2":"101385.0"},{"1":"Tennessee","2":"101385.0"},{"1":"Ole Miss","2":"100827.2"},{"1":"Arkansas","2":"100549.5"},{"1":"Vanderbilt","2":"96246.0"},{"1":"Auburn","2":"84992.8"},{"1":"Mississippi State","2":"84992.8"},{"1":"Texas A&M","2":"84992.8"},{"1":"Kentucky","2":"60622.5"},{"1":"Georgia","2":"19424.0"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-
-</div>
+    ## # A tibble: 12 × 2
+    ##    away_team         avg_attendance
+    ##    <chr>                      <dbl>
+    ##  1 Florida                  101821 
+    ##  2 Missouri                 101821 
+    ##  3 LSU                      101385 
+    ##  4 Tennessee                101385 
+    ##  5 Ole Miss                 100827.
+    ##  6 Arkansas                 100550.
+    ##  7 Vanderbilt                96246 
+    ##  8 Auburn                    84993.
+    ##  9 Mississippi State         84993.
+    ## 10 Texas A&M                 84993.
+    ## 11 Kentucky                  60622.
+    ## 12 Georgia                   19424
 
 While there seems to be similar averages for many of the conference
 teams, I am surprised by `Missouri` and `Florida` being at the top, as
@@ -672,13 +692,21 @@ bama_excitement_avg <- bama_results %>%
 bama_excitement_avg
 ```
 
-<div data-pagedtable="false">
-
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["away_team"],"name":[1],"type":["chr"],"align":["left"]},{"label":["avg_excitement"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"Georgia","2":"6.00"},{"1":"Florida","2":"4.00"},{"1":"LSU","2":"3.75"},{"1":"Auburn","2":"2.60"},{"1":"Tennessee","2":"2.50"},{"1":"Texas A&M","2":"2.20"},{"1":"Arkansas","2":"2.00"},{"1":"Ole Miss","2":"2.00"},{"1":"Mississippi State","2":"1.60"},{"1":"Kentucky","2":"1.00"},{"1":"Vanderbilt","2":"1.00"},{"1":"Missouri","2":"0.00"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-
-</div>
+    ## # A tibble: 12 × 2
+    ##    away_team         avg_excitement
+    ##    <chr>                      <dbl>
+    ##  1 Georgia                     6   
+    ##  2 Florida                     4   
+    ##  3 LSU                         3.75
+    ##  4 Auburn                      2.6 
+    ##  5 Tennessee                   2.5 
+    ##  6 Texas A&M                   2.2 
+    ##  7 Arkansas                    2   
+    ##  8 Ole Miss                    2   
+    ##  9 Mississippi State           1.6 
+    ## 10 Kentucky                    1   
+    ## 11 Vanderbilt                  1   
+    ## 12 Missouri                    0
 
 As I suspected, `Missouri` does not seem to be as important of a game
 compared to some of the well known top programs, so it’s interesting
@@ -779,7 +807,7 @@ ggplot(coaches_wins, aes(x = "", y = total_wins, fill = coach)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 It looks like `Nick Saban` and `Mack Brown` are the two active coaches
 that have the most wins and by a good margin. I think this relates well
@@ -820,7 +848,7 @@ ggplot(high_capacity, aes(reorder(name, -capacity),
             position = position_stack(vjust = 0.8))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 We can also look at a contingency table of the number of stadiums in
 each state. It is not surprising that the states

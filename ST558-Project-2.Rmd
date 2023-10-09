@@ -333,7 +333,7 @@ sd <- talent %>%
   #sort descending
   arrange(desc(sd_talent))
 
-sd
+print(sd)
 ```
 
 Unfortunately for the school I care about most, it looks like `Texas A&M` has the most variability each year in their composite rankings for the schools of relevance. As suspected, `Alabama` has little variability in their scores, along with `Michigan` and `Notre Dame`, which are in a slighly lower tier.
