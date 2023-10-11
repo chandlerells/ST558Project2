@@ -3,9 +3,9 @@ title: 'CFBD-API-Vignette'
 author: "Chandler Ellsworth"
 ---
 
-This document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams. 
+This document is a vignette about contacting the `CollegeFootballData.com` (CFBD) API using created functions to query, parse, and return well-structured data. CFBD is a sports statistics and analytics website with no direct affiliation to the NCAA, its member conferences, or its member teams.  
 
-The functions will be used in this document to obtain data from the API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
+The functions will be used in this document to obtain data from the CFBD API as well as some basic exploratory data analysis. The functions can be used to gather the following types of data:  
 
 * talent composite ranking for a particular season by team  
 * coaching history based on first and last name  
@@ -405,7 +405,7 @@ bind_gr_sd <- bind_game_results %>%
 print(bind_gr_sd)
 ```
 
-Also similar to the results of the standard deviation of composite rankings, `Texas A&M` has the most variability over the 10 season period in terms of margin of victory. `Alabama` has the least variability, meaning they are going to be more consistent across seasons in terms of their margin of victory.
+Also similar to the results of the standard deviation of composite rankings, `Texas A&M` has high variability over the 10 season period in terms of margin of victory. `Alabama` has the least variability, meaning they are going to be more consistent across seasons in terms of their margin of victory.
 
 We can also dive into more specific metrics, such as how each of these teams scores their touchdowns, to give them the margin of victories they each have. We will do this by using the `apply` function on the `team_season_stats` function across each combo of season and team. We will find averages for each of the statistics that include `TD` in them and plot using a scatter plot.
 
